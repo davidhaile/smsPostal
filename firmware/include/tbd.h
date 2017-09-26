@@ -11,6 +11,8 @@
 	How to send SMS from an Electron using AT commands
 	https://community.particle.io/t/sending-sms-from-particle-electron-using-at-commands/21020
 
+	Good read on system threading
+	https://docs.particle.io/reference/firmware/electron/#system-thread
 */
 
 /*

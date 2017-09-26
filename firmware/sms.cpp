@@ -38,7 +38,9 @@ void Sms::remove(char *phoneNumber) {
 
 //--------------------------------------------------------------------------------------------------
 void Sms::list() {
-	customerList.list();
+	WITH_LOCK(Serial) {
+		customerList.list();
+	}
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -50,9 +52,11 @@ Sms::Sms() {
 
 //--------------------------------------------------------------------------------------------------
 static int callback(int type, const char* buf, int len, char* param) {
-	Serial.print("Return: ");
-	Serial.write((const uint8_t*)buf, len);
-	Serial.println();
+	WITH_LOCK(Serial) {
+		Serial.print("Return: ");
+		Serial.write((const uint8_t*)buf, len);
+		Serial.println();
+	}
 
 	return WAIT;
 }
@@ -62,27 +66,30 @@ static int callback(int type, const char* buf, int len, char* param) {
 //--------------------------------------------------------------------------------------------------
 int Sms::sendMessage(char *phoneNumber, char* pMessage) {
 	char szCmd[64];
+	int retVal;
 
-	sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
+	WITH_LOCK(Serial) {
+		sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
 
-	Serial.print("Sending command ");
-	Serial.print(szCmd);
-	Serial.println();
+		Serial.print("Sending command ");
+		Serial.print(szCmd);
+		Serial.println();
 
-	char szReturn[32] = "";
+		char szReturn[32] = "";
 
-	Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
-	Cellular.command(callback, szReturn, TIMEOUT, szCmd);
-	Cellular.command(callback, szReturn, TIMEOUT, pMessage);
+		Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
+		Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+		Cellular.command(callback, szReturn, TIMEOUT, pMessage);
 
-	sprintf(szCmd, "%c", CTRL_Z);
+		sprintf(szCmd, "%c", CTRL_Z);
 
-	int retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+		retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
 
-	if (RESP_OK == retVal) {
-		Serial.println("+OK, Message Send");
-	} else {
-		Serial.println("+ERROR, error sending message");
+		if (RESP_OK == retVal) {
+			Serial.println("+OK, Message Send");
+		} else {
+			Serial.println("+ERROR, error sending message");
+		}
 	}
 
 	return retVal;
