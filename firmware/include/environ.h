@@ -22,6 +22,7 @@
 #include "commands.h"
 #include "housekeeping.h"
 #include "eeprom.h"
+#include "sms.h"
 
 #define WAIT_UNTIL_SYSTEM_IS_READY	while (!globalData.system.ready) {delay(500);};
 

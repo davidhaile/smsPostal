@@ -8,16 +8,6 @@ typedef struct {
 	} system;
 } configurationDataType;
 
-#ifdef GLOBAL
-	configurationDataType configurationData;
-	uint16_t eepromChecksum;	// The checksum immediately follows configurationData in the EEPROM
-	Thread *eepromThread;
-#endif
-
-extern configurationDataType configurationData;
-extern uint16_t eepromChecksum;
-extern Thread *eepromThread;
-
 //==================================================================================================
 class Eeprom {
  public:
@@ -32,5 +22,12 @@ private:
 
 #ifdef GLOBAL
 	Eeprom eeprom;
+	configurationDataType configurationData;
+	uint16_t eepromChecksum;	// The checksum immediately follows configurationData in the EEPROM
+	Thread *eepromThread;
 #endif
+
 extern Eeprom eeprom;
+extern configurationDataType configurationData;
+extern uint16_t eepromChecksum;
+extern Thread *eepromThread;

@@ -40,9 +40,6 @@ void setup() {
 		Serial.read();
 	}
 
-	// Last module to initialize
-	housekeeping.open();
-
 	// Setup for mountain daylight time
 	Time.zone(-6);
 

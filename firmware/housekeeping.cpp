@@ -77,7 +77,7 @@ os_thread_return_t housekeepingTask() {
 }
 
 //-------------------------------------------------------------------------------------------------
-void Housekeeping::open() {
+Housekeeping::Housekeeping() {
 
 	// Number of seconds on startup that LED indicates cellular strength
 	globalData.cell.countdownTimer = 60;

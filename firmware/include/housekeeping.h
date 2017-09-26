@@ -3,7 +3,7 @@
 #define HOUSEKEEPING_H
 	class Housekeeping {
 	public:
-		void open();
+		Housekeeping();
 		void update();
 	private:
 	};

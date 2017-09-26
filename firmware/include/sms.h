@@ -2,9 +2,8 @@
 
 class Sms {
 public:
-	Sms() {
-		smsThread = new Thread("SMS", smsTask);
-	}
+	Sms();
+	int sendMessage(char *, char*);
 private:
 };
 
