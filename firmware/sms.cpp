@@ -11,10 +11,6 @@
 
 Thread *smsThread;
 
-#define MAX_PHONE_NUMBER    14
-#define CTRL_Z 0x1A
-#define TIMEOUT 10000
-
 static int callback(int, const char *, int, char *);
 
 //--------------------------------------------------------------------------------------------------
@@ -38,9 +34,7 @@ void Sms::remove(char *phoneNumber) {
 
 //--------------------------------------------------------------------------------------------------
 void Sms::list() {
-	WITH_LOCK(Serial) {
-		customerList.list();
-	}
+	customerList.list();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -64,28 +58,48 @@ static int callback(int type, const char* buf, int len, char* param) {
 //--------------------------------------------------------------------------------------------------
 // Phone number must have the area code in it. Ex: "9706912766"
 //--------------------------------------------------------------------------------------------------
-int Sms::sendMessage(char *phoneNumber, char* pMessage) {
+int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
 	char szCmd[64];
-	int retVal;
+	int retVal = RESP_OK;
+	char phoneNumber[MAX_PHONE_NUMBER];
+
+	// Validate number
+	int length = strlen(inputPhoneNumber);
+
+	if (length < 7) {
+		// Not enough numbers
+		return(FAIL);
+	}
+
+	if (length == 10) {
+		// Missing '1' at the beginning
+		strcpy(phoneNumber, "1");
+		strncat(phoneNumber, inputPhoneNumber, sizeof(phoneNumber) - 1);
+	} else {
+		// Assume all is OK
+		strncpy(phoneNumber, inputPhoneNumber, sizeof(phoneNumber));
+	}
+
+	sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
 
 	WITH_LOCK(Serial) {
-		sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
-
 		Serial.print("Sending command ");
 		Serial.print(szCmd);
 		Serial.println();
+	}
 
-		char szReturn[32] = "";
+	char szReturn[32] = "";
 
-		Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
-		Cellular.command(callback, szReturn, TIMEOUT, szCmd);
-		Cellular.command(callback, szReturn, TIMEOUT, pMessage);
+	Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
+	Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+	Cellular.command(callback, szReturn, TIMEOUT, pMessage);
 
-		sprintf(szCmd, "%c", CTRL_Z);
+	sprintf(szCmd, "%c", CTRL_Z);
 
-		retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+	retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
 
-		if (RESP_OK == retVal) {
+	WITH_LOCK(Serial) {
+		if (retVal == RESP_OK) {
 			Serial.println("+OK, Message Send");
 		} else {
 			Serial.println("+ERROR, error sending message");

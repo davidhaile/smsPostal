@@ -108,11 +108,6 @@ os_thread_return_t commandTask() {
 Commands::Commands() {
 	commandListType *pList = commandList;
 
-	// Flush serial input buffer
-	while (Serial.available()) {
-		Serial.read();
-	}
-
 	for (uint16_t i = 0; i < NUMBER_OF_COMMANDS; i++) {
 		sCmd.addCommand(pList->command, pList->process);
 		pList++;
