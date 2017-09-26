@@ -1,0 +1,121 @@
+#include "include/environ.h"
+
+static Thread *commandThread;
+
+SerialCommand sCmd;
+
+static void sendHelp();
+static void ping();
+static void unrecognized(const char *);
+static void update();
+
+typedef struct {
+	/*char *command;*/
+	String command;
+	void (* process)();
+} commandListType;
+
+commandListType commandList[] = {
+	{"on", 		LED_on},
+	{"off", 	LED_off},
+	{"ping",	ping},
+	{"time",	displayTime},
+	{"h", 		sendHelp},	// Must be last in the list
+};
+
+#define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)
+
+//------------------------------------------------------------------------------------------------------
+static void update() {
+	switch (sCmd.state) {
+	case SC_INVALID_STATE:
+		sCmd.state = SC_WAIT_FOR_COMMAND;
+		break;
+	case SC_WAIT_FOR_COMMAND:
+		sCmd.readSerial();
+		break;
+	default:
+		/*sCmd.state = SC_WAIT_FOR_COMMAND;*/
+		break;
+	}
+
+	#ifdef SKIP
+		switch (sCmd.state) {
+		case SC_INVALID_STATE:
+			Serial.println("SC_INVALID_STATE");
+			break;
+		case SC_WAIT_FOR_COMMAND:
+			Serial.println("SC_WAIT_FOR_COMMAND");
+			break;
+		case SC_WAIT_FOR_REQUEST:
+			Serial.println("SC_WAIT_FOR_REQUEST");
+			break;
+		case SC_SEND_REQUEST:
+			Serial.println("SC_SEND_REQUEST");
+			break;
+		case SC_WAIT_FOR_RESPONSE:
+			Serial.println("SC_WAIT_FOR_RESPONSE");
+			break;
+		default:
+			Serial.println("Unknown statel");
+			break;
+		}
+	#endif
+}
+
+//------------------------------------------------------------------------------------------------------
+// Run continuously. Check for serial input once per second.
+//------------------------------------------------------------------------------------------------------
+os_thread_return_t commandTask() {
+	WAIT_UNTIL_SYSTEM_IS_READY;
+
+	while (true) {
+		update();
+		delay(100);
+	}
+}
+
+//------------------------------------------------------------------------------------------------------
+// Constructor
+//------------------------------------------------------------------------------------------------------
+Commands::Commands() {
+	commandListType *pList = commandList;
+
+	// Flush serial input buffer
+	while (Serial.available()) {
+		Serial.read();
+	}
+
+	for (uint16_t i = 0; i < NUMBER_OF_COMMANDS; i++) {
+		sCmd.addCommand(pList->command, pList->process);
+		pList++;
+	}
+
+	sCmd.setDefaultHandler(unrecognized);
+
+	commandThread = new Thread("Commands", commandTask);
+}
+
+//------------------------------------------------------------------------------------------------------
+static void ping() {
+	Serial.println("Ping");
+	globalData.system.pingRequest = true;
+}
+
+//------------------------------------------------------------------------------------------------------
+// This gets set as the default handler, and gets called when no other command matches.
+//------------------------------------------------------------------------------------------------------
+static void unrecognized(const char *command) {
+	Serial.print("Unrecognized command: ");
+	char c = *command;
+	Serial.println(c);
+}
+
+//------------------------------------------------------------------------------------------------------
+static void sendHelp() {
+	Serial.println("Commands");
+	Serial.println("--------");
+	for (uint16_t i=0; i<(NUMBER_OF_COMMANDS-1); i++) {
+		Serial.println(commandList[i].command);
+	}
+}
