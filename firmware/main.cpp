@@ -14,7 +14,7 @@
 
 SYSTEM_THREAD(ENABLED);
 
-ApplicationWatchdog wd(660000, System.reset); //This Watchdog code will reset the processor if the dog is not kicked every 11 mins which gives time for 2 modem reset's.
+/*ApplicationWatchdog wd(660000, System.reset); //This Watchdog code will reset the processor if the dog is not kicked every 11 mins which gives time for 2 modem reset's.*/
 
 //-------------------------------------------------------------------------------------------------
 void setup() {
@@ -48,4 +48,5 @@ void setup() {
 
 //--------------------------------------------------------------------------------------------------
 void loop() {
+	// This application uses tasks, therefore nothing is accomplished in the main loop().
 }

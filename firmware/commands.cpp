@@ -44,11 +44,13 @@ void smsList() {
 
 //------------------------------------------------------------------------------------------------------
 void smsAdd() {
+	// TBD: Get this number from the next value
 	sms.add((char *)"9706912766");
 }
 
 //------------------------------------------------------------------------------------------------------
 void smsRemove() {
+	// TBD: Get this number from the next value
 	sms.remove((char *)"9706912766");
 }
 
@@ -120,7 +122,9 @@ Commands::Commands() {
 
 //------------------------------------------------------------------------------------------------------
 static void ping() {
-	Serial.println("Ping");
+	WITH_LOCK(Serial) {
+		Serial.println("Ping");
+	}
 	globalData.system.pingRequest = true;
 }
 
@@ -128,16 +132,20 @@ static void ping() {
 // This gets set as the default handler, and gets called when no other command matches.
 //------------------------------------------------------------------------------------------------------
 static void unrecognized(const char *command) {
-	Serial.print("Unrecognized command: ");
-	char c = *command;
-	Serial.println(c);
+	WITH_LOCK(Serial) {
+		Serial.print("Unrecognized command: ");
+		char c = *command;
+		Serial.println(c);
+	}
 }
 
 //------------------------------------------------------------------------------------------------------
 static void sendHelp() {
-	Serial.println("Commands");
-	Serial.println("--------");
-	for (uint16_t i=0; i<(NUMBER_OF_COMMANDS-1); i++) {
-		Serial.println(commandList[i].command);
+	WITH_LOCK(Serial) {
+		Serial.println("Commands");
+		Serial.println("--------");
+		for (uint16_t i=0; i<(NUMBER_OF_COMMANDS-1); i++) {
+			Serial.println(commandList[i].command);
+		}
 	}
 }

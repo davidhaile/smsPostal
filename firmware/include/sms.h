@@ -35,11 +35,13 @@ class List {
 	// Add the value to the list.
 	// Return FAIL if there is not enough space.
 	// Return FAIL if the number already exists in the list.
+	// TBD: "1234567" should be considered the same as "3071234567" and "13071234567"
 	//----------------------------------------------------------------------------------------------
 	bool add(char *phoneNumber) {
 		node *temp = new node;
 
 		if (find(phoneNumber) >= 0) {
+			sendMessage(phoneNumber, "This number is already in the list")
 			return(FAIL);
 		}
 
@@ -54,6 +56,7 @@ class List {
 			tail = temp;
 		}
 
+		sendMessage(phoneNumber, "Added")
 		return(PASS);
 	}
 
@@ -91,6 +94,7 @@ class List {
 
 		if (position >= 0) {
 			delete_position(position);
+			sendMessage(phoneNumber, "Removed")
 			return(PASS);
 		} else {
 			return(FAIL);
