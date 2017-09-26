@@ -5,6 +5,9 @@
 #endif
 #define NULL	(void *)0
 
+#define PASS	false
+#define FAIL	true
+
 // System Includes
 #include "Particle.h"
 #include <sys/time.h>

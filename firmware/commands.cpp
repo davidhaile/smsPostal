@@ -8,6 +8,9 @@ static void sendHelp();
 static void ping();
 static void unrecognized(const char *);
 static void update();
+static void smsAdd();
+static void smsRemove();
+static void smsList();
 
 typedef struct {
 	/*char *command;*/
@@ -16,14 +19,38 @@ typedef struct {
 } commandListType;
 
 commandListType commandList[] = {
+	// SMS Commands
+	{"add", 	smsAdd},
+	{"del", 	smsRemove},
+	{"rem", 	smsRemove},
+	{"delete", 	smsRemove},
+	{"remove", 	smsRemove},
+	{"list", 	smsList},
+
 	{"on", 		LED_on},
 	{"off", 	LED_off},
 	{"ping",	ping},
+
 	{"time",	displayTime},
 	{"h", 		sendHelp},	// Must be last in the list
 };
 
 #define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)
+
+//------------------------------------------------------------------------------------------------------
+void smsList() {
+	sms.list();
+}
+
+//------------------------------------------------------------------------------------------------------
+void smsAdd() {
+	sms.add((char *)"9706912766");
+}
+
+//------------------------------------------------------------------------------------------------------
+void smsRemove() {
+	sms.remove((char *)"9706912766");
+}
 
 //------------------------------------------------------------------------------------------------------
 static void update() {

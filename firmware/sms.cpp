@@ -1,4 +1,12 @@
+//--------------------------------------------------------------------------------------------------
 // SMS
+//--------------------------------------------------------------------------------------------------
+/*
+	A customer is identified by a phone number. The customer subscribes to the list by texting the
+	command "add". The customer is removed by texting the word "delete" or "remove". A customer
+	may also text the command "list" and receive a list of customers in response. TBD: Figure this
+	out when return is greater than 140 characters.
+*/
 #include "include/environ.h"
 
 Thread *smsThread;
@@ -19,6 +27,21 @@ os_thread_return_t smsTask() {
 }
 
 //--------------------------------------------------------------------------------------------------
+void Sms::add(char *phoneNumber) {
+	customerList.add(phoneNumber);
+}
+
+//--------------------------------------------------------------------------------------------------
+void Sms::remove(char *phoneNumber) {
+	customerList.remove(phoneNumber);
+}
+
+//--------------------------------------------------------------------------------------------------
+void Sms::list() {
+	customerList.list();
+}
+
+//--------------------------------------------------------------------------------------------------
 // Constructor
 //--------------------------------------------------------------------------------------------------
 Sms::Sms() {
@@ -27,41 +50,40 @@ Sms::Sms() {
 
 //--------------------------------------------------------------------------------------------------
 static int callback(int type, const char* buf, int len, char* param) {
-    Serial.print("Return: ");
-    Serial.write((const uint8_t*)buf, len);
-    Serial.println();
+	Serial.print("Return: ");
+	Serial.write((const uint8_t*)buf, len);
+	Serial.println();
 
-    return WAIT;
+	return WAIT;
 }
 
 //--------------------------------------------------------------------------------------------------
 // Phone number must have the area code in it. Ex: "9706912766"
 //--------------------------------------------------------------------------------------------------
 int Sms::sendMessage(char *phoneNumber, char* pMessage) {
-    char szCmd[64];
+	char szCmd[64];
 
-    sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
+	sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
 
-    Serial.print("Sending command ");
-    Serial.print(szCmd);
-    Serial.println();
+	Serial.print("Sending command ");
+	Serial.print(szCmd);
+	Serial.println();
 
-    char szReturn[32] = "";
+	char szReturn[32] = "";
 
-    Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
-    Cellular.command(callback, szReturn, TIMEOUT, szCmd);
-    Cellular.command(callback, szReturn, TIMEOUT, pMessage);
+	Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
+	Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+	Cellular.command(callback, szReturn, TIMEOUT, pMessage);
 
-    sprintf(szCmd, "%c", CTRL_Z);
+	sprintf(szCmd, "%c", CTRL_Z);
 
-    int retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+	int retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
 
-    if(RESP_OK == retVal){
-        Serial.println("+OK, Message Send");
-    }
-    else{
-        Serial.println("+ERROR, error sending message");
-    }
+	if (RESP_OK == retVal) {
+		Serial.println("+OK, Message Send");
+	} else {
+		Serial.println("+ERROR, error sending message");
+	}
 
-    return retVal;
+	return retVal;
 }
