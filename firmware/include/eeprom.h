@@ -15,6 +15,8 @@ class Eeprom {
 	void update();		// Write eeprom if contents of configurationData have changed
 	void clear();		// Erase the entire eeprom
 	void setDefaults();
+	void updateCustomerList() {}
+	void readCustomerList() {}
 private:
 	uint16_t getConfigurationDataChecksum();
 	void writeConfigurationData();

@@ -15,6 +15,12 @@ class Sms {
   private:
 };
 
+#ifdef GLOBAL
+	Sms sms;
+#endif
+
+extern Sms sms;
+
 //--------------------------------------------------------------------------------------------------
 // Single Linked List - TBD: Write the customerList structure to EEPROM and read on startup.
 //--------------------------------------------------------------------------------------------------
@@ -41,7 +47,7 @@ class List {
 		node *temp = new node;
 
 		if (find(phoneNumber) >= 0) {
-			sendMessage(phoneNumber, "This number is already in the list")
+			sms.sendMessage(phoneNumber, (char *)"This number is already in the list");
 			return(FAIL);
 		}
 
@@ -56,7 +62,9 @@ class List {
 			tail = temp;
 		}
 
-		sendMessage(phoneNumber, "Added")
+		eeprom.updateCustomerList();
+
+		sms.sendMessage(phoneNumber, (char *)"Added");
 		return(PASS);
 	}
 
@@ -94,7 +102,8 @@ class List {
 
 		if (position >= 0) {
 			delete_position(position);
-			sendMessage(phoneNumber, "Removed")
+			sms.sendMessage(phoneNumber, (char *)"Removed");
+			eeprom.updateCustomerList();
 			return(PASS);
 		} else {
 			return(FAIL);
@@ -199,9 +208,7 @@ class List {
 };
 
 #ifdef GLOBAL
-	Sms sms;
 	List customerList;
 #endif
 
-extern Sms sms;
 extern List customerList;
