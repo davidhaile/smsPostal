@@ -11,6 +11,7 @@ static void update();
 static void smsAdd();
 static void smsRemove();
 static void smsList();
+static void process_command();
 
 typedef struct {
 	/*char *command;*/
@@ -30,6 +31,7 @@ commandListType commandList[] = {
 	{"on", 		LED_on},
 	{"off", 	LED_off},
 	{"ping",	ping},
+	{"process",	process_command},
 
 	{"time",	displayTime},
 	{"h", 		sendHelp},	// Must be last in the list
@@ -37,24 +39,35 @@ commandListType commandList[] = {
 
 #define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)
 
-//------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void smsList() {
 	sms.list();
 }
 
-//------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void smsAdd() {
-	// TBD: Get this number from the next value
-	sms.add((char *)"9706912766");
+	char *arg;
+
+	arg = sCmd.next();
+	if (arg != NULL) {
+		// TBD: Check that it is a valid number. Add area code if none given.
+		sms.add(arg);
+	} else {
+		Serial.println("No arguments");
+	}
 }
 
-//------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 void smsRemove() {
-	// TBD: Get this number from the next value
-	sms.remove((char *)"9706912766");
+	char *arg;
+
+	arg = sCmd.next();
+	if (arg != NULL) {
+		sms.remove(arg);
+	}
 }
 
-//------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 static void update() {
 	switch (sCmd.state) {
 	case SC_INVALID_STATE:
@@ -68,28 +81,28 @@ static void update() {
 		break;
 	}
 
-	#ifdef SKIP
-		switch (sCmd.state) {
-		case SC_INVALID_STATE:
-			Serial.println("SC_INVALID_STATE");
-			break;
-		case SC_WAIT_FOR_COMMAND:
-			Serial.println("SC_WAIT_FOR_COMMAND");
-			break;
-		case SC_WAIT_FOR_REQUEST:
-			Serial.println("SC_WAIT_FOR_REQUEST");
-			break;
-		case SC_SEND_REQUEST:
-			Serial.println("SC_SEND_REQUEST");
-			break;
-		case SC_WAIT_FOR_RESPONSE:
-			Serial.println("SC_WAIT_FOR_RESPONSE");
-			break;
-		default:
-			Serial.println("Unknown statel");
-			break;
-		}
-	#endif
+#ifdef SKIP
+	switch (sCmd.state) {
+	case SC_INVALID_STATE:
+		Serial.println("SC_INVALID_STATE");
+		break;
+	case SC_WAIT_FOR_COMMAND:
+		Serial.println("SC_WAIT_FOR_COMMAND");
+		break;
+	case SC_WAIT_FOR_REQUEST:
+		Serial.println("SC_WAIT_FOR_REQUEST");
+		break;
+	case SC_SEND_REQUEST:
+		Serial.println("SC_SEND_REQUEST");
+		break;
+	case SC_WAIT_FOR_RESPONSE:
+		Serial.println("SC_WAIT_FOR_RESPONSE");
+		break;
+	default:
+		Serial.println("Unknown statel");
+		break;
+	}
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -144,8 +157,33 @@ static void sendHelp() {
 	WITH_LOCK(Serial) {
 		Serial.println("Commands");
 		Serial.println("--------");
-		for (uint16_t i=0; i<(NUMBER_OF_COMMANDS-1); i++) {
+		for (uint16_t i = 0; i < (NUMBER_OF_COMMANDS - 1); i++) {
 			Serial.println(commandList[i].command);
 		}
+	}
+}
+
+//------------------------------------------------------------------------------------------------------
+static void process_command() {
+	int aNumber;
+	char *arg;
+
+	Serial.println("We're in process_command");
+	arg = sCmd.next();
+	if (arg != NULL) {
+		aNumber = atoi(arg);  // Converts a char string to an integer
+		Serial.print("First argument was: ");
+		Serial.println(aNumber);
+	} else {
+		Serial.println("No arguments");
+	}
+
+	arg = sCmd.next();
+	if (arg != NULL) {
+		aNumber = atol(arg);
+		Serial.print("Second argument was: ");
+		Serial.println(aNumber);
+	} else {
+		Serial.println("No second argument");
 	}
 }

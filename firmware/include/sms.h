@@ -4,6 +4,18 @@
 #define CTRL_Z				0x1A
 #define TIMEOUT				10000
 
+#ifdef DISABLE_CELL
+	#define REPLY_VIA_SERIAL_PORT
+#else
+	#define REPLY_VIA_SERIAL_PORT
+#endif
+
+#ifdef REPLY_VIA_SERIAL_PORT
+	#define REPLY_MESSAGE(a)	Serial.println((char *)a)
+#else
+	#define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
+#endif
+
 //--------------------------------------------------------------------------------------------------
 class Sms {
   public:
@@ -24,13 +36,20 @@ extern Sms sms;
 //--------------------------------------------------------------------------------------------------
 // Single Linked List - TBD: Write the customerList structure to EEPROM and read on startup.
 //--------------------------------------------------------------------------------------------------
-struct node {
-	char *phoneNumber;
-	node *next;
+class NodeType {
+public:
+	NodeType(char *inputNumber, NodeType *p) {
+		strcpy(phoneNumber, inputNumber);
+		next = p;
+	}
+	char phoneNumber[MAX_PHONE_NUMBER];
+	NodeType *next;
 };
+
+//--------------------------------------------------------------------------------------------------
 class List {
   private:
-	node *head, *tail;
+	nodeType *head, *tail;
   public:
 	List() {
 		head = NULL;
@@ -43,11 +62,14 @@ class List {
 	// Return FAIL if the number already exists in the list.
 	// TBD: "1234567" should be considered the same as "3071234567" and "13071234567"
 	//----------------------------------------------------------------------------------------------
-	bool add(char *phoneNumber) {
+	bool add(nodeType *list, char *phoneNumber) {
 		node *temp = new node;
 
+		Serial.print("Adding: ");
+		Serial.println(phoneNumber);
+
 		if (find(phoneNumber) >= 0) {
-			sms.sendMessage(phoneNumber, (char *)"This number is already in the list");
+			REPLY_MESSAGE("This number is already in the list");
 			return(FAIL);
 		}
 
@@ -64,7 +86,7 @@ class List {
 
 		eeprom.updateCustomerList();
 
-		sms.sendMessage(phoneNumber, (char *)"Added");
+		REPLY_MESSAGE("Added");
 		return(PASS);
 	}
 
@@ -78,8 +100,15 @@ class List {
 		int counter = 0;
 		bool foundNumber = false;
 
+		Serial.print(phoneNumber);
+		Serial.print(": ");
+
 		while ((current!=NULL) && !foundNumber) {
-			if (strcmp(current->phoneNumber, phoneNumber) == 0) {
+			Serial.print(current->phoneNumber);
+			Serial.print(", ");
+			int result = strcmp(current->phoneNumber, phoneNumber);
+			Serial.print("Result: "); Serial.print(result);
+			if (result == 0) {
 				foundNumber = true;
 			} else {
 				current=current->next;
@@ -88,8 +117,10 @@ class List {
 		}
 
 		if (foundNumber) {
+			Serial.println("Found");
 			return(counter);
 		} else {
+			Serial.println("Not Found");
 			return(-1);
 		}
 	}
@@ -102,7 +133,7 @@ class List {
 
 		if (position >= 0) {
 			delete_position(position);
-			sms.sendMessage(phoneNumber, (char *)"Removed");
+			REPLY_MESSAGE("Removed");
 			eeprom.updateCustomerList();
 			return(PASS);
 		} else {
