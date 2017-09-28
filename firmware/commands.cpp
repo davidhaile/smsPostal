@@ -53,6 +53,7 @@ static void smsClearList() {
 	Serial.println("Erasing available EEPROM");
 	EEPROM.clear();
 	eeprom.writeConfigurationData();
+	customerList.clearList();
 }
 
 //--------------------------------------------------------------------------------------------------

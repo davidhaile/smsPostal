@@ -47,9 +47,9 @@ Sms::Sms() {
 //--------------------------------------------------------------------------------------------------
 static int callback(int type, const char* buf, int len, char* param) {
 	WITH_LOCK(Serial) {
-		Serial.print("Return: ");
+		/*Serial.print("Return: ");*/
 		Serial.write((const uint8_t*)buf, len);
-		Serial.println();
+		/*Serial.println();*/
 	}
 
 	return WAIT;
@@ -59,7 +59,7 @@ static int callback(int type, const char* buf, int len, char* param) {
 // Phone number must have the area code in it. Ex: "9706912766"
 //--------------------------------------------------------------------------------------------------
 int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
-	char szCmd[64];
+	char szCmd[80];
 	int retVal = RESP_OK;
 	char phoneNumber[MAX_PHONE_NUMBER];
 
@@ -80,13 +80,8 @@ int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
 		strncpy(phoneNumber, inputPhoneNumber, sizeof(phoneNumber));
 	}
 
+	memset(szCmd, 0, sizeof(szCmd));
 	sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
-
-	WITH_LOCK(Serial) {
-		Serial.print("Sending command ");
-		Serial.print(szCmd);
-		Serial.println();
-	}
 
 	char szReturn[32] = "";
 
@@ -97,14 +92,6 @@ int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
 	sprintf(szCmd, "%c", CTRL_Z);
 
 	retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
-
-	WITH_LOCK(Serial) {
-		if (retVal == RESP_OK) {
-			Serial.println("+OK, Message Send");
-		} else {
-			Serial.println("+ERROR, error sending message");
-		}
-	}
 
 	return retVal;
 }

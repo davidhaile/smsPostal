@@ -8,13 +8,13 @@
 #ifdef DISABLE_CELL
 	#define REPLY_VIA_SERIAL_PORT
 #else
-	// #define REPLY_VIA_SERIAL_PORT
+	#define REPLY_VIA_SERIAL_PORT
 #endif
 
 #ifdef REPLY_VIA_SERIAL_PORT
 	#define REPLY_MESSAGE(a)	Serial.println((char *)a)
 #else
-	#define REPLY_MESSAGE(a)	{Serial.println((char *)a);Serial.println("Sending message");sms.sendMessage(phoneNumber, (char *)a);}
+	#define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
 #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -52,10 +52,8 @@ class List {
 
 	// Write FF's to all available EEPROM
 	void clearList() {
-		Serial.print("EEPROM Length:");
-		Serial.println(eeprom.available.length);
-		for (int i=0; i<eeprom.available.length; i++) {
-			EEPROM.write(eeprom.available.length + i, ERASED_VALUE);
+		while (head!=NULL) {
+			delete_last();
 		}
 	}
 
@@ -67,9 +65,11 @@ class List {
 
 		Node *current = head;
 		while (current!=NULL) {
+			#error CRAPOLA Stopped here
 			WITH_LOCK(Serial) {
-				Serial.print("Adding ");
-				Serial.println(current->phoneNumber);
+				Serial.print("Adding \"");
+				Serial.print(current->phoneNumber);
+				Serial.println("\"");
 			}
 			memset(tempPhoneNumber, 0, sizeof(tempPhoneNumber));
 			strcpy(tempPhoneNumber, current->phoneNumber);
@@ -127,12 +127,12 @@ class List {
 	// Return FAIL if the number already exists in the list.
 	// TBD: "1234567" should be considered the same as "3071234567" and "13071234567"
 	//----------------------------------------------------------------------------------------------
-	// bool add(Node *list, char *phoneNumber) {
 	bool add(char *phoneNumber) {
 		Node *temp = new Node;
 
-		Serial.print("Adding: ");
-		Serial.println(phoneNumber);
+		Serial.print("Adding: \"");
+		Serial.print(phoneNumber);
+		Serial.println("\"");
 
 		if (find(phoneNumber) >= 0) {
 			REPLY_MESSAGE("This number is already in the list");
