@@ -19,23 +19,12 @@ Thread *smsThread;
 #endif
 
 static int callback(int, const char *, int, char *);
-static int rxCallback(int, const char *, int, char *);
 
 char szReturn[32] = "";
 
-static int rxCallback(int type, const char* buf, int len, char* param) {
-	WITH_LOCK(Serial) {
-		Serial.print("Rx: ");
-		Serial.write((const uint8_t*)buf, len);
-		Serial.println();
-	}
-
-	return WAIT;
-}
-
 //--------------------------------------------------------------------------------------------------
 os_thread_return_t smsTask() {
-	uint16_t counter = 0;
+	/*uint16_t counter = 0;*/
 	WAIT_UNTIL_SYSTEM_IS_READY;
 
 	// Wait even more time
@@ -44,54 +33,53 @@ os_thread_return_t smsTask() {
 	sms.mutex = false;
 
 	while (true) {
-		WITH_LOCK(Serial) {
+		/*WITH_LOCK(Serial) {
 			Serial.print("SMS Task: ");
 			Serial.print(counter);
 			Serial.print(", ");
 			Serial.print(sms.smsCounter);
+			Serial.print(", ");
+			Serial.print(sms.smsDelete);
+
 			Serial.println();
 			counter++;
 		}
+*/
+		sms.check();
 
-		#ifdef SKIP	//DISABLE_CELL
-			#ifdef USE_UCOMMAND
-				GRAB_MUTEX;
-				/*SINGLE_THREADED_BLOCK() {*/
-				{
+		if (sms.requestDeleteAll) {
+			sms.requestDeleteAll = false;
 
-				}
-				RELEASE_MUTEX;
-			#else
-				/*Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CMGR=1\r\n");*/
-				Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CPMS?\r\n");	// Sort of. Need to understand what it is doing.
-				/*Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CPMS=1\r\n");*/	// No
-			#endif
-		#endif
+			/*Serial.print("Deleting all incoming messages. ");*/
+			sms.deleteAll();
+			/*Serial.println("Done");*/
+		}
 
-		delay(FIFTEEN_SECONDS);
+		delay(ONE_SECOND);
 	}
 }
 
 //--------------------------------------------------------------------------------------------------
 void Sms::check() {
-	uCmd.setDebug(false);
-	if (uCmd.checkMessages(FIFTEEN_SECONDS) == RESP_OK) {
+	if (uCmd.checkMessages(ONE_SECOND) == RESP_OK) {
 		uCmd.smsPtr = uCmd.smsResults;
 		for(int i=0;i<uCmd.numMessages;i++){
-			/*WITH_LOCK(Serial) {
-				Serial.printlnf("message received %s",uCmd.smsPtr->sms);
-			}*/
+			WITH_LOCK(Serial) {
+				displayTime();
+				Serial.printlnf("Message: [%s]",uCmd.smsPtr->sms);
+			}
 			uCmd.smsPtr++;
 			smsCounter++;
+
+			// Delete everything that arrived because it has already been processed
+			sms.requestDeleteAll = true;
 		}
 	}
-	uCmd.setDebug(true);
 }
 
 //--------------------------------------------------------------------------------------------------
 void Sms::deleteAll() {
 	// delete all the messages
-	uCmd.setDebug(false);
 	uCmd.smsPtr = uCmd.smsResults;
 	for(int i=0;i<uCmd.numMessages;i++){
 		uCmd.deleteMessage(uCmd.smsPtr->mess,10000);
@@ -103,8 +91,8 @@ void Sms::deleteAll() {
 			}
 		}*/
 		uCmd.smsPtr++;
+		smsDelete++;
 	}
-	uCmd.setDebug(true);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -127,8 +115,8 @@ void Sms::list() {
 //--------------------------------------------------------------------------------------------------
 Sms::Sms() {
 	#ifdef USE_UCOMMAND
-		uCmd.setDebug(true);
-		/*uCmd.setDebug(false);*/
+		/*uCmd.setDebug(true);*/
+		uCmd.setDebug(false);
 
 		// set up text mode for the sms
 		uCmd.setSMSMode(1);

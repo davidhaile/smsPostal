@@ -11,7 +11,7 @@ struct _messStruct {
 static struct _messStruct* _messPtr;
 static struct _messStruct _messResults[10];
 static char _messN;
-static char _u_debug;
+static char _u_debug = false;
 
 /*
 	The callback function for the Cellular.command() - unfortunately Particle don't seem
@@ -29,7 +29,10 @@ int callback(int type, const char* buf, int len, char* result) {
 	for (i = 0; i < _messN; i++) { _messPtr++; }	// need to point at the right location
 	tp = (char*)buf + len;
 	*tp = 0;	// the buffer is not null terminated so we don't want leftover crap
-	if (_u_debug) { Serial.printlnf("Response in callback %x: %i : %s: \r\n", type, len, buf); }
+	/*if (_u_debug) {*/
+	if (false) {
+		Serial.printlnf("Response in callback %x: %i : %s: \r\n", type, len, buf);
+	}
 	switch (type) {
 	case TYPE_UNKNOWN :
 		// this could be the next part of a +CMGL response with the sms text in buf

@@ -59,7 +59,8 @@ static void smsCheck() {
 //--------------------------------------------------------------------------------------------------
 static void smsDeleteAll() {
 	Serial.println("Delete All outstanding texts");
-	sms.deleteAll();
+	sms.requestDeleteAll = true;
+	/*sms.deleteAll();*/
 	Serial.println("Done");
 }
 
