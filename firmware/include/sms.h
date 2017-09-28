@@ -3,17 +3,18 @@
 #define MAX_PHONE_NUMBER    14
 #define CTRL_Z				0x1A
 #define TIMEOUT				10000
+#define ERASED_VALUE		0xFF
 
 #ifdef DISABLE_CELL
 	#define REPLY_VIA_SERIAL_PORT
 #else
-	#define REPLY_VIA_SERIAL_PORT
+	// #define REPLY_VIA_SERIAL_PORT
 #endif
 
 #ifdef REPLY_VIA_SERIAL_PORT
 	#define REPLY_MESSAGE(a)	Serial.println((char *)a)
 #else
-	#define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
+	#define REPLY_MESSAGE(a)	{Serial.println((char *)a);Serial.println("Sending message");sms.sendMessage(phoneNumber, (char *)a);}
 #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -46,6 +47,78 @@ class List {
 	List() {
 		head = NULL;
 		tail = NULL;
+		readList();
+	}
+
+	// Write FF's to all available EEPROM
+	void clearList() {
+		Serial.print("EEPROM Length:");
+		Serial.println(eeprom.available.length);
+		for (int i=0; i<eeprom.available.length; i++) {
+			EEPROM.write(eeprom.available.length + i, ERASED_VALUE);
+		}
+	}
+
+	// Store the customer list in EEPROM
+	bool storeList() {
+		uint16_t startAddress = eeprom.available.startAddress;
+		char tempPhoneNumber[MAX_PHONE_NUMBER];
+		int counter = 0;
+
+		Node *current = head;
+		while (current!=NULL) {
+			WITH_LOCK(Serial) {
+				Serial.print("Adding ");
+				Serial.println(current->phoneNumber);
+			}
+			memset(tempPhoneNumber, 0, sizeof(tempPhoneNumber));
+			strcpy(tempPhoneNumber, current->phoneNumber);
+			EEPROM.put(startAddress, tempPhoneNumber);
+			startAddress += sizeof(tempPhoneNumber);
+			current = current->next;
+			counter++;
+		}
+
+		WITH_LOCK(Serial) {
+			Serial.print("The list is ");
+			Serial.print(counter);
+			Serial.println(" entries.");
+		}
+
+		return(PASS);
+	}
+
+	//----------------------------------------------------------------------------------------------
+	bool readList() {
+		uint16_t startAddress = eeprom.available.startAddress;
+		char tempPhoneNumber[MAX_PHONE_NUMBER];
+		uint16_t counter = 0;
+
+		do {
+			EEPROM.get(startAddress, tempPhoneNumber);
+			if (tempPhoneNumber[0] != ERASED_VALUE) {
+				WITH_LOCK(Serial) {
+					Serial.print(counter);
+					Serial.print(": ");
+					Serial.println(tempPhoneNumber);
+				}
+
+				// Add to list if it doesn't exist
+				if (find(tempPhoneNumber) == -1) {
+					add(tempPhoneNumber);
+				}
+				startAddress += sizeof(tempPhoneNumber);
+				counter++;
+			}
+		} while (tempPhoneNumber[0] != ERASED_VALUE);
+
+		WITH_LOCK(Serial) {
+			Serial.print("The list is ");
+			Serial.print(counter);
+			Serial.println(" entries.");
+		}
+
+		return(PASS);
 	}
 
 	//----------------------------------------------------------------------------------------------
@@ -77,12 +150,24 @@ class List {
 			tail = temp;
 		}
 
-		eeprom.updateCustomerList();
+		storeList();
 
 		REPLY_MESSAGE("Added");
 		return(PASS);
 	}
 
+	//----------------------------------------------------------------------------------------------
+	int numberOfEntries() {
+		Node *current=new Node;
+		current=head;
+		int counter = 0;
+
+		while (current != NULL) {
+			current = current->next;
+		}
+
+		return(counter);
+	}
 	//----------------------------------------------------------------------------------------------
 	// Returns -1 if phoneNumber is not found, otherwise returns its position in the list
 	//----------------------------------------------------------------------------------------------
@@ -127,7 +212,7 @@ class List {
 		if (position >= 0) {
 			delete_position(position);
 			REPLY_MESSAGE("Removed");
-			eeprom.updateCustomerList();
+			storeList();
 			return(PASS);
 		} else {
 			return(FAIL);

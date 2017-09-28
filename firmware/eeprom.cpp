@@ -51,6 +51,9 @@ void Eeprom::writeConfigurationData() {
 	eepromChecksum = getConfigurationDataChecksum();
 	EEPROM.put(0, configurationData);
 	EEPROM.put(sizeof(configurationData), eepromChecksum);
+
+	available.startAddress = sizeof(configurationData) + sizeof(eepromChecksum);
+	available.length = EEPROM.length() - available.startAddress;
 }
 
 //------------------------------------------------------------------------------------------------------

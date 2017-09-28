@@ -15,11 +15,13 @@ class Eeprom {
 	void update();		// Write eeprom if contents of configurationData have changed
 	void clear();		// Erase the entire eeprom
 	void setDefaults();
-	void updateCustomerList() {}
-	void readCustomerList() {}
+	void writeConfigurationData();
+	struct {
+		uint16_t startAddress;
+		uint16_t length;
+	} available;
 private:
 	uint16_t getConfigurationDataChecksum();
-	void writeConfigurationData();
 };
 
 #ifdef GLOBAL

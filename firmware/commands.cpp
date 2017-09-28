@@ -12,6 +12,8 @@ static void smsAdd();
 static void smsRemove();
 static void smsList();
 static void process_command();
+static void smsReadList();
+static void smsClearList();
 
 typedef struct {
 	/*char *command;*/
@@ -27,6 +29,8 @@ commandListType commandList[] = {
 	{"delete", 	smsRemove},
 	{"remove", 	smsRemove},
 	{"list", 	smsList},
+	{"read",	smsReadList},
+	{"clear",	smsClearList},
 
 	{"on", 		LED_on},
 	{"off", 	LED_off},
@@ -40,8 +44,21 @@ commandListType commandList[] = {
 #define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)
 
 //--------------------------------------------------------------------------------------------------
-void smsList() {
+static void smsList() {
 	sms.list();
+}
+
+//--------------------------------------------------------------------------------------------------
+static void smsClearList() {
+	Serial.println("Erasing available EEPROM");
+	EEPROM.clear();
+	eeprom.writeConfigurationData();
+}
+
+//--------------------------------------------------------------------------------------------------
+static void smsReadList() {
+	Serial.println("Reading the list from the EEPROM");
+	customerList.readList();
 }
 
 //--------------------------------------------------------------------------------------------------
