@@ -10,15 +10,66 @@
 #include "include/environ.h"
 
 Thread *smsThread;
+#ifndef DISABLE_CELL
+	uCommand uCmd;
+#endif
 
 static int callback(int, const char *, int, char *);
+static int rxCallback(int, const char *, int, char *);
+
+char szReturn[32] = "";
+
+static int rxCallback(int type, const char* buf, int len, char* param) {
+	WITH_LOCK(Serial) {
+		Serial.print("Rx: ");
+		Serial.write((const uint8_t*)buf, len);
+		Serial.println();
+	}
+
+	return WAIT;
+}
 
 //--------------------------------------------------------------------------------------------------
 os_thread_return_t smsTask() {
+	uint16_t counter = 0;
+	uint16_t smsCounter = 0;
 	WAIT_UNTIL_SYSTEM_IS_READY;
 
+	// Wait even more time
+	delay(FIFTEEN_SECONDS);
+
 	while (true) {
-		delay(ONE_MINUTE);
+		WITH_LOCK(Serial) {
+			Serial.print("SMS Task: ");
+			Serial.print(counter);
+			Serial.print(", ");
+			Serial.print(smsCounter);
+			Serial.println();
+			counter++;
+		}
+
+		#ifndef DISABLE_CELL
+			#ifdef SKIP
+				GRAB_MUTEX;
+				SINGLE_THREADED_BLOCK() {
+					if (uCmd.checkMessages(FIFTEEN_SECONDS) == RESP_OK) {
+						uCmd.smsPtr = uCmd.smsResults;
+						for(int i=0;i<uCmd.numMessages;i++){
+							/*Serial.printlnf("message received %s",uCmd.smsPtr->sms);*/
+							uCmd.smsPtr++;
+							smsCounter++;
+						}
+					}
+				}
+				RELEASE_MUTEX;
+			#else
+				/*Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CMGR=1\r\n");*/
+				/*Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CPMS?\r\n");*/
+				Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CPMS=1\r\n");
+			#endif
+		#endif
+
+		delay(FIFTEEN_SECONDS);
 	}
 }
 
@@ -41,6 +92,13 @@ void Sms::list() {
 // Constructor
 //--------------------------------------------------------------------------------------------------
 Sms::Sms() {
+	#ifndef DISABLE_CELL
+		uCmd.setDebug(false);
+
+		// set up text mode for the sms
+		uCmd.setSMSMode(1);
+	#endif
+
 	smsThread = new Thread("SMS", smsTask);
 }
 
@@ -85,9 +143,11 @@ int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
 
 	char szReturn[32] = "";
 
+	GRAB_MUTEX;
 	Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
 	Cellular.command(callback, szReturn, TIMEOUT, szCmd);
 	Cellular.command(callback, szReturn, TIMEOUT, pMessage);
+	RELEASE_MUTEX;
 
 	sprintf(szCmd, "%c", CTRL_Z);
 

@@ -17,6 +17,15 @@
 	#define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
 #endif
 
+#ifdef SKIP
+	#define GRAB_MUTEX		{while (sms.mutex) {delay(5);}; sms.mutex = true;}
+	#define RELEASE_MUTEX	sms.mutex = false
+#else
+	// No wait until I fully debug this feature
+	#define GRAB_MUTEX		sms.mutex = true
+	#define RELEASE_MUTEX	sms.mutex = false
+#endif
+
 //--------------------------------------------------------------------------------------------------
 class Sms {
   public:
@@ -25,6 +34,7 @@ class Sms {
 	void add(char *);
 	void remove(char *);
 	void list();
+	bool mutex = false;		// Grab the mutex if it is false. Set to true to keep others out.
   private:
 };
 
@@ -65,7 +75,6 @@ class List {
 
 		Node *current = head;
 		while (current!=NULL) {
-			#error CRAPOLA Stopped here
 			WITH_LOCK(Serial) {
 				Serial.print("Adding \"");
 				Serial.print(current->phoneNumber);

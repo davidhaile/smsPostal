@@ -14,6 +14,7 @@ static void smsList();
 static void process_command();
 static void smsReadList();
 static void smsClearList();
+static void analogDisplay();
 
 typedef struct {
 	/*char *command;*/
@@ -36,6 +37,7 @@ commandListType commandList[] = {
 	{"off", 	LED_off},
 	{"ping",	ping},
 	{"process",	process_command},
+	{"a",		analogDisplay},
 
 	{"time",	displayTime},
 	{"h", 		sendHelp},	// Must be last in the list
@@ -44,7 +46,15 @@ commandListType commandList[] = {
 #define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)
 
 //--------------------------------------------------------------------------------------------------
+static void analogDisplay() {
+	Serial.print("Ambient light ");
+	Serial.print(globalData.system.ambientLight, 2);
+	Serial.println();
+}
+
+//--------------------------------------------------------------------------------------------------
 static void smsList() {
+	Serial.println("List of numbers");
 	sms.list();
 }
 
