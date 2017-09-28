@@ -2,6 +2,9 @@
 /**
 
 */
+
+#define MAX_RECEIVED_MESSAGES	50
+#define SMS_BUFFER_SIZE			100
 class uCommand {
   public:
 	bool setDebug(bool);
@@ -14,8 +17,8 @@ class uCommand {
 	unsigned char sendLength = 0;
 	unsigned char rxIndex = 0;
 	unsigned char rxLength = 0;
-	char sendBuffer[100];
-	char rxBuffer[100];
+	char sendBuffer[SMS_BUFFER_SIZE];
+	char rxBuffer[SMS_BUFFER_SIZE];
 	struct smsStruct {
 		char mess;
 		char status[10];
@@ -23,7 +26,7 @@ class uCommand {
 		char sms[50];
 	};
 	struct smsStruct* smsPtr;
-	struct smsStruct smsResults[10];
+	struct smsStruct smsResults[MAX_RECEIVED_MESSAGES];
 	char numMessages;
   private:
 };

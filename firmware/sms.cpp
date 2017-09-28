@@ -9,8 +9,12 @@
 */
 #include "include/environ.h"
 
-Thread *smsThread;
 #ifndef DISABLE_CELL
+	#define USE_UCOMMAND
+#endif
+
+Thread *smsThread;
+#ifdef USE_UCOMMAND
 	uCommand uCmd;
 #endif
 
@@ -32,34 +36,29 @@ static int rxCallback(int type, const char* buf, int len, char* param) {
 //--------------------------------------------------------------------------------------------------
 os_thread_return_t smsTask() {
 	uint16_t counter = 0;
-	uint16_t smsCounter = 0;
 	WAIT_UNTIL_SYSTEM_IS_READY;
 
 	// Wait even more time
 	delay(FIFTEEN_SECONDS);
+
+	sms.mutex = false;
 
 	while (true) {
 		WITH_LOCK(Serial) {
 			Serial.print("SMS Task: ");
 			Serial.print(counter);
 			Serial.print(", ");
-			Serial.print(smsCounter);
+			Serial.print(sms.smsCounter);
 			Serial.println();
 			counter++;
 		}
 
-		#ifndef DISABLE_CELL
-			#ifdef SKIP
+		#ifdef SKIP	//DISABLE_CELL
+			#ifdef USE_UCOMMAND
 				GRAB_MUTEX;
-				SINGLE_THREADED_BLOCK() {
-					if (uCmd.checkMessages(FIFTEEN_SECONDS) == RESP_OK) {
-						uCmd.smsPtr = uCmd.smsResults;
-						for(int i=0;i<uCmd.numMessages;i++){
-							/*Serial.printlnf("message received %s",uCmd.smsPtr->sms);*/
-							uCmd.smsPtr++;
-							smsCounter++;
-						}
-					}
+				/*SINGLE_THREADED_BLOCK() {*/
+				{
+
 				}
 				RELEASE_MUTEX;
 			#else
@@ -71,6 +70,41 @@ os_thread_return_t smsTask() {
 
 		delay(FIFTEEN_SECONDS);
 	}
+}
+
+//--------------------------------------------------------------------------------------------------
+void Sms::check() {
+	uCmd.setDebug(false);
+	if (uCmd.checkMessages(FIFTEEN_SECONDS) == RESP_OK) {
+		uCmd.smsPtr = uCmd.smsResults;
+		for(int i=0;i<uCmd.numMessages;i++){
+			/*WITH_LOCK(Serial) {
+				Serial.printlnf("message received %s",uCmd.smsPtr->sms);
+			}*/
+			uCmd.smsPtr++;
+			smsCounter++;
+		}
+	}
+	uCmd.setDebug(true);
+}
+
+//--------------------------------------------------------------------------------------------------
+void Sms::deleteAll() {
+	// delete all the messages
+	uCmd.setDebug(false);
+	uCmd.smsPtr = uCmd.smsResults;
+	for(int i=0;i<uCmd.numMessages;i++){
+		uCmd.deleteMessage(uCmd.smsPtr->mess,10000);
+		/*WITH_LOCK(Serial) {
+			if(uCmd.deleteMessage(uCmd.smsPtr->mess,10000) == RESP_OK){
+				Serial.println("message deleted successfully");
+			} else {
+				Serial.println("could not delete message");
+			}
+		}*/
+		uCmd.smsPtr++;
+	}
+	uCmd.setDebug(true);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -92,8 +126,9 @@ void Sms::list() {
 // Constructor
 //--------------------------------------------------------------------------------------------------
 Sms::Sms() {
-	#ifndef DISABLE_CELL
-		uCmd.setDebug(false);
+	#ifdef USE_UCOMMAND
+		uCmd.setDebug(true);
+		/*uCmd.setDebug(false);*/
 
 		// set up text mode for the sms
 		uCmd.setSMSMode(1);

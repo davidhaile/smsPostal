@@ -137,7 +137,7 @@ int uCommand::checkMessages(int timeout) {
 	_messPtr = _messResults;
 	if (debugMode) {
 		Serial.println("Results of the list message command are");
-		for (i = 0; i < _messN; i++) {
+		for (i = 0; (i < _messN) && (i < MAX_RECEIVED_MESSAGES); i++) {
 			Serial.printlnf("message number %d", _messPtr->mess);
 			Serial.printlnf("message status %s", _messPtr->status);
 			Serial.printlnf("message phone %s", _messPtr->phone);
@@ -150,7 +150,7 @@ int uCommand::checkMessages(int timeout) {
 	_messPtr = _messResults;
 	smsPtr = smsResults;
 	numMessages = _messN;
-	for (i = 0; i < _messN; i++) {
+	for (i = 0; (i < _messN) && (i < MAX_RECEIVED_MESSAGES); i++) {
 		smsPtr->mess = _messPtr->mess;
 		strcpy(smsPtr->status, _messPtr->status);
 		strcpy(smsPtr->phone, _messPtr->phone);

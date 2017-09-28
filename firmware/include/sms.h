@@ -17,7 +17,7 @@
 	#define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
 #endif
 
-#ifdef SKIP
+#ifndef SKIP
 	#define GRAB_MUTEX		{while (sms.mutex) {delay(5);}; sms.mutex = true;}
 	#define RELEASE_MUTEX	sms.mutex = false
 #else
@@ -34,7 +34,10 @@ class Sms {
 	void add(char *);
 	void remove(char *);
 	void list();
+	void check();
+	void deleteAll();
 	bool mutex = false;		// Grab the mutex if it is false. Set to true to keep others out.
+	uint16_t smsCounter = 0;
   private:
 };
 
@@ -138,7 +141,7 @@ class List {
 		// Validate the number
 		for (int i=0; i<MAX_PHONE_NUMBER; i++) {
 			// Quit if we reach the end of the string
-			if (phoneNumber[i] == NULL) {
+			if (phoneNumber[i] == NULL_CHAR) {
 				break;
 			}
 			if (!isdigit(phoneNumber[i])) {

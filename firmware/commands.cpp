@@ -15,6 +15,8 @@ static void process_command();
 static void smsReadList();
 static void smsClearList();
 static void analogDisplay();
+static void smsCheck();
+static void smsDeleteAll();
 
 typedef struct {
 	/*char *command;*/
@@ -32,6 +34,8 @@ commandListType commandList[] = {
 	{"list", 	smsList},
 	{"read",	smsReadList},
 	{"clear",	smsClearList},
+	{"check",	smsCheck},
+	{"x", 		smsDeleteAll},
 
 	{"on", 		LED_on},
 	{"off", 	LED_off},
@@ -44,6 +48,20 @@ commandListType commandList[] = {
 };
 
 #define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)
+
+//--------------------------------------------------------------------------------------------------
+static void smsCheck() {
+	Serial.println("Check texts");
+	sms.check();
+	Serial.println("Done");
+}
+
+//--------------------------------------------------------------------------------------------------
+static void smsDeleteAll() {
+	Serial.println("Delete All outstanding texts");
+	sms.deleteAll();
+	Serial.println("Done");
+}
 
 //--------------------------------------------------------------------------------------------------
 static void analogDisplay() {

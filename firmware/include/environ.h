@@ -5,6 +5,8 @@
 // #endif
 // #define NULL	(void *)0
 
+#define NULL_CHAR	'\0'
+
 #define PASS	false
 #define FAIL	true
 

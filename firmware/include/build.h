@@ -11,7 +11,7 @@
 	#else
 	#endif
 
-	#define DISABLE_CELL
+	// #define DISABLE_CELL
 	#ifdef DISABLE_CELL
 		#define SAVE_POWER
 		#define STARTUP_WITH_CELL_OFF
