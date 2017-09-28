@@ -34,22 +34,14 @@ class Sms {
 extern Sms sms;
 
 //--------------------------------------------------------------------------------------------------
-// Single Linked List - TBD: Write the customerList structure to EEPROM and read on startup.
-//--------------------------------------------------------------------------------------------------
-class NodeType {
-public:
-	NodeType(char *inputNumber, NodeType *p) {
-		strcpy(phoneNumber, inputNumber);
-		next = p;
-	}
+struct Node {
 	char phoneNumber[MAX_PHONE_NUMBER];
-	NodeType *next;
+	Node *next;
 };
 
-//--------------------------------------------------------------------------------------------------
 class List {
   private:
-	nodeType *head, *tail;
+	Node *head, *tail;
   public:
 	List() {
 		head = NULL;
@@ -62,8 +54,9 @@ class List {
 	// Return FAIL if the number already exists in the list.
 	// TBD: "1234567" should be considered the same as "3071234567" and "13071234567"
 	//----------------------------------------------------------------------------------------------
-	bool add(nodeType *list, char *phoneNumber) {
-		node *temp = new node;
+	// bool add(Node *list, char *phoneNumber) {
+	bool add(char *phoneNumber) {
+		Node *temp = new Node;
 
 		Serial.print("Adding: ");
 		Serial.println(phoneNumber);
@@ -73,7 +66,7 @@ class List {
 			return(FAIL);
 		}
 
-		temp->phoneNumber = phoneNumber;
+		strcpy(temp->phoneNumber, phoneNumber);
 		temp->next = NULL;
 		if (head == NULL) {
 			head = temp;
@@ -94,20 +87,20 @@ class List {
 	// Returns -1 if phoneNumber is not found, otherwise returns its position in the list
 	//----------------------------------------------------------------------------------------------
 	int find(char *phoneNumber) {
-		node *current=new node;
+		Node *current=new Node;
 		current=head;
 
 		int counter = 0;
 		bool foundNumber = false;
 
-		Serial.print(phoneNumber);
-		Serial.print(": ");
+		// Serial.print(phoneNumber);
+		// Serial.print(": ");
 
 		while ((current!=NULL) && !foundNumber) {
-			Serial.print(current->phoneNumber);
-			Serial.print(", ");
+			// Serial.print(current->phoneNumber);
+			// Serial.print(", ");
 			int result = strcmp(current->phoneNumber, phoneNumber);
-			Serial.print("Result: "); Serial.print(result);
+			// Serial.print("Result: "); Serial.print(result);
 			if (result == 0) {
 				foundNumber = true;
 			} else {
@@ -117,10 +110,10 @@ class List {
 		}
 
 		if (foundNumber) {
-			Serial.println("Found");
+			// Serial.println("Found");
 			return(counter);
 		} else {
-			Serial.println("Not Found");
+			// Serial.println("Not Found");
 			return(-1);
 		}
 	}
@@ -143,7 +136,7 @@ class List {
 
 	//----------------------------------------------------------------------------------------------
 	void list() {
-		node *temp=new node;
+		Node *temp=new Node;
 		temp=head;
 		int counter = 0;
 
@@ -162,8 +155,8 @@ class List {
 
 	//----------------------------------------------------------------------------------------------
 	void createnode(char *phoneNumber) {
-		node *temp = new node;
-		temp->phoneNumber = phoneNumber;
+		Node *temp = new Node;
+		strcpy(temp->phoneNumber, phoneNumber);
 		temp->next = NULL;
 		if (head == NULL) {
 			head = temp;
@@ -176,30 +169,30 @@ class List {
 	}
 	//----------------------------------------------------------------------------------------------
 	void insert_start(char *phoneNumber) {
-		node *temp = new node;
-		temp->phoneNumber = phoneNumber;
+		Node *temp = new Node;
+		strcpy(temp->phoneNumber, phoneNumber);
 		temp->next = head;
 		head = temp;
 	}
 
 	//----------------------------------------------------------------------------------------------
 	void insert_position(int pos, char *phoneNumber) {
-		node *pre = new node;
-		node *cur = new node;
-		node *temp = new node;
+		Node *pre = new Node;
+		Node *cur = new Node;
+		Node *temp = new Node;
 		cur = head;
 		for (int i = 1; i < pos; i++) {
 			pre = cur;
 			cur = cur->next;
 		}
-		temp->phoneNumber = phoneNumber;
+		strcpy(temp->phoneNumber, phoneNumber);
 		pre->next = temp;
 		temp->next = cur;
 	}
 
 	//----------------------------------------------------------------------------------------------
 	void delete_first() {
-		node *temp = new node;
+		Node *temp = new Node;
 		temp = head;
 		head = head->next;
 		delete temp;
@@ -207,8 +200,8 @@ class List {
 
 	//----------------------------------------------------------------------------------------------
 	void delete_last() {
-		node *current = new node;
-		node *previous = new node;
+		Node *current = new Node;
+		Node *previous = new Node;
 		current = head;
 		while (current->next != NULL) {
 			previous = current;
@@ -221,8 +214,8 @@ class List {
 
 	//----------------------------------------------------------------------------------------------
 	void delete_position(int pos) {
-		node *current = new node;
-		node *previous = new node;
+		Node *current = new Node;
+		Node *previous = new Node;
 		current = head;
 
 		if (pos == 0) {
