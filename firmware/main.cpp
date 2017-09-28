@@ -6,10 +6,10 @@
 #undef GLOBAL
 
 #ifdef SAVE_POWER
-	SYSTEM_MODE(MANUAL);	// Cell starts OFF?
+SYSTEM_MODE(MANUAL);	// Cell starts OFF?
 #else
-	// lets keep the radio off until we get a fix, or 2 minutes go by.
-	SYSTEM_MODE(SEMI_AUTOMATIC);
+// lets keep the radio off until we get a fix, or 2 minutes go by.
+SYSTEM_MODE(SEMI_AUTOMATIC);
 #endif
 
 SYSTEM_THREAD(ENABLED);
@@ -23,17 +23,17 @@ void setup() {
 
 	memset(&globalData, 0, sizeof(globalData));
 
-	#ifdef SAVE_POWER
-		Cellular.off();
+#ifdef SAVE_POWER
+	Cellular.off();
 
-		// Bright RED indicates cell is off
-		RGB.control(true);
-		RGB.color(0xff, 0, 0);
-		RGB.brightness(50);
-	#else
-		Cellular.on();
-		Cellular.connect();
-	#endif
+	// Bright RED indicates cell is off
+	RGB.control(true);
+	RGB.color(0xff, 0, 0);
+	RGB.brightness(50);
+#else
+	Cellular.on();
+	Cellular.connect();
+#endif
 
 	// Flush buffer
 	while (Serial.available()) {

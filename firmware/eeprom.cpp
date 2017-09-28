@@ -26,19 +26,19 @@ Eeprom::Eeprom() {
 
 //------------------------------------------------------------------------------------------------------
 uint16_t Eeprom::getConfigurationDataChecksum() {
-	#define CHECKSUM_SEED	0xA5A5
-    uint16_t chk = CHECKSUM_SEED;
+#define CHECKSUM_SEED	0xA5A5
+	uint16_t chk = CHECKSUM_SEED;
 	uint8_t *p = (uint8_t *)&configurationData;
 	uint16_t length = sizeof(configurationData);
 
-    while (length-- != 0) {
-        chk -= *p++;
+	while (length-- != 0) {
+		chk -= *p++;
 	}
-    return chk;
+	return chk;
 }
 
 //------------------------------------------------------------------------------------------------------
-void Eeprom::setDefaults(){
+void Eeprom::setDefaults() {
 	EEPROM.clear();
 
 	memset(&configurationData, 0, sizeof(configurationData));

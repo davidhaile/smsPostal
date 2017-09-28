@@ -35,5 +35,5 @@ uint16_t byteSwap(uint16_t value) {
 	uint8_t *p;
 
 	p = (uint8_t *)&value;
-	return(BYTESWAP(p));
+	return (BYTESWAP(p));
 }

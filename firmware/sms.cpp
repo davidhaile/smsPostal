@@ -64,8 +64,8 @@ os_thread_return_t smsTask() {
 				RELEASE_MUTEX;
 			#else
 				/*Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CMGR=1\r\n");*/
-				/*Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CPMS?\r\n");*/
-				Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CPMS=1\r\n");
+				Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CPMS?\r\n");	// Sort of. Need to understand what it is doing.
+				/*Cellular.command(rxCallback, szReturn, TIMEOUT, "AT+CPMS=1\r\n");*/	// No
 			#endif
 		#endif
 

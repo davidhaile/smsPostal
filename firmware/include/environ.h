@@ -1,9 +1,9 @@
 // Environ.h
 
-#ifdef NULL
-	#undef NULL
-#endif
-#define NULL	(void *)0
+// #ifdef NULL
+// 	#undef NULL
+// #endif
+// #define NULL	(void *)0
 
 #define PASS	false
 #define FAIL	true

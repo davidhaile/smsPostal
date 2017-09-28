@@ -62,9 +62,15 @@ class List {
 
 	// Write FF's to all available EEPROM
 	void clearList() {
-		while (head!=NULL) {
-			delete_last();
+		Node *current = head;
+		Node *next;
+
+		while (current != NULL) {
+			next = current->next;
+			free(current);
+			current = next;
 		}
+		head = NULL;
 	}
 
 	// Store the customer list in EEPROM
@@ -75,23 +81,12 @@ class List {
 
 		Node *current = head;
 		while (current!=NULL) {
-			WITH_LOCK(Serial) {
-				Serial.print("Adding \"");
-				Serial.print(current->phoneNumber);
-				Serial.println("\"");
-			}
 			memset(tempPhoneNumber, 0, sizeof(tempPhoneNumber));
 			strcpy(tempPhoneNumber, current->phoneNumber);
 			EEPROM.put(startAddress, tempPhoneNumber);
 			startAddress += sizeof(tempPhoneNumber);
 			current = current->next;
 			counter++;
-		}
-
-		WITH_LOCK(Serial) {
-			Serial.print("The list is ");
-			Serial.print(counter);
-			Serial.println(" entries.");
 		}
 
 		return(PASS);
@@ -105,6 +100,7 @@ class List {
 
 		do {
 			EEPROM.get(startAddress, tempPhoneNumber);
+			// if ((tempPhoneNumber[0] != ERASED_VALUE) && (strlen(tempPhoneNumber) > 0)) {
 			if (tempPhoneNumber[0] != ERASED_VALUE) {
 				WITH_LOCK(Serial) {
 					Serial.print(counter);
@@ -122,7 +118,7 @@ class List {
 		} while (tempPhoneNumber[0] != ERASED_VALUE);
 
 		WITH_LOCK(Serial) {
-			Serial.print("The list is ");
+			Serial.print("The list has ");
 			Serial.print(counter);
 			Serial.println(" entries.");
 		}
@@ -139,9 +135,16 @@ class List {
 	bool add(char *phoneNumber) {
 		Node *temp = new Node;
 
-		Serial.print("Adding: \"");
-		Serial.print(phoneNumber);
-		Serial.println("\"");
+		// Validate the number
+		for (int i=0; i<MAX_PHONE_NUMBER; i++) {
+			// Quit if we reach the end of the string
+			if (phoneNumber[i] == NULL) {
+				break;
+			}
+			if (!isdigit(phoneNumber[i])) {
+				return(FAIL);
+			}
+		}
 
 		if (find(phoneNumber) >= 0) {
 			REPLY_MESSAGE("This number is already in the list");
@@ -187,9 +190,6 @@ class List {
 		int counter = 0;
 		bool foundNumber = false;
 
-		// Serial.print(phoneNumber);
-		// Serial.print(": ");
-
 		while ((current!=NULL) && !foundNumber) {
 			// Serial.print(current->phoneNumber);
 			// Serial.print(", ");
@@ -204,10 +204,8 @@ class List {
 		}
 
 		if (foundNumber) {
-			// Serial.println("Found");
 			return(counter);
 		} else {
-			// Serial.println("Not Found");
 			return(-1);
 		}
 	}
