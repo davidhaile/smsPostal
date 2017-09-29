@@ -20,7 +20,8 @@ static void smsDeleteAll();
 
 typedef struct {
 	/*char *command;*/
-	String command;
+	/*String command;*/
+	char command[SERIALCOMMAND_MAXCOMMANDLENGTH];
 	void (* process)();
 } commandListType;
 
@@ -41,9 +42,10 @@ commandListType commandList[] = {
 	{"off", 	LED_off},
 	{"ping",	ping},
 	{"process",	process_command},
-	{"a",		analogDisplay},
+	{"light",	analogDisplay},
 
 	{"time",	displayTime},
+	{"help", 	sendHelp},
 	{"h", 		sendHelp},	// Must be last in the list
 };
 
@@ -192,11 +194,11 @@ static void ping() {
 // This gets set as the default handler, and gets called when no other command matches.
 //------------------------------------------------------------------------------------------------------
 static void unrecognized(const char *command) {
-	WITH_LOCK(Serial) {
+	/*WITH_LOCK(Serial) {
 		Serial.print("Unrecognized command: ");
 		char c = *command;
 		Serial.println(c);
-	}
+	}*/
 }
 
 //------------------------------------------------------------------------------------------------------

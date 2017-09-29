@@ -54,6 +54,9 @@ os_thread_return_t smsTask() {
 			sms.deleteAll();
 		}
 
+		// This may be too much for a long test. Fills the screen with nothing useful.
+		/*Serial.print('.');*/
+
 		LED(toggle);
 		toggle = !toggle;
 
@@ -63,23 +66,34 @@ os_thread_return_t smsTask() {
 
 //--------------------------------------------------------------------------------------------------
 void Sms::check() {
+	char incomingMessage[SMS_BUFFER_SIZE];
+	char phoneNumber[SMS_PHONE_SIZE];
+
 	if (uCmd.checkMessages(ONE_SECOND) == RESP_OK) {
 		uCmd.smsPtr = uCmd.smsResults;
-		/*for(int i=0;i<uCmd.numMessages;i++){*/
-		for (int i=0;i<(uCmd.numMessages-1);i++) {	// Last message is always NULL
-			WITH_LOCK(Serial) {
-				displayTime();
-				Serial.printlnf("Message %d: From: %s [%s]", i, uCmd.smsPtr->phone, uCmd.smsPtr->sms);
+		for(int i=0;i<uCmd.numMessages;i++){
+			if ((strlen(uCmd.smsPtr->status) > 0) && strstr(uCmd.smsPtr->status, "UNREAD")) {
+				strncpy(incomingMessage, uCmd.smsPtr->sms, sizeof(incomingMessage));
+				strncpy(phoneNumber, uCmd.smsPtr->phone, sizeof(phoneNumber));
+
+				WITH_LOCK(Serial) {
+					displayTime();
+					Serial.printlnf("Message %d: From: %s [%s] Status: [%s]", i, phoneNumber, incomingMessage, uCmd.smsPtr->status);
+				}
+
+				// Add a terminator so that it works the same as coming from StdIn
+				strcat(incomingMessage, "\r");
+
+				// Process the incoming command
+				sCmd.processMessage(incomingMessage, phoneNumber);
+
+				uCmd.smsPtr++;
+				smsCounter++;
+
+				// Delete everything that arrived because it has already been processed
+				// 2017-09-29 This may not be necessary
+				/*sms.requestDeleteAll = true;*/
 			}
-
-			// Process the incoming command
-			sCmd.readBuffer(uCmd.smsPtr->sms);
-
-			uCmd.smsPtr++;
-			smsCounter++;
-
-			// Delete everything that arrived because it has already been processed
-			sms.requestDeleteAll = true;
 		}
 	}
 }

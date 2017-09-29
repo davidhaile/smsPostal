@@ -5,7 +5,19 @@
 /*
 	TBD:
 
+	2017-09-29 Status - Haven't seen a valid incoming text in a while. I'm not positive that the
+	problem is within the Electron. Changed
+
 	2017-09-27: Having trouble with an extra number added to the list that is a NULL length.
+
+	2017-09-29: No reason to read a text if it has already been read. Check the status for UA_READ.
+	REC UNREAD	REC UNREAD+19706912766
+	REC READAD	REC READAD+19706912766
+
+	2017-09-29: SerialCommand should be modified to allow multiple terminators and ignore all in
+	message. '\r'. '\n', '\0'
+
+	Why does it stop accepting Serial input? TBD: Add bufferIncomingValue() from other projects.
 
 	Resources:
 
@@ -23,6 +35,9 @@
 
 	Great resource for workflow - compiling in the cloud, download via USB, etc.
 	https://community.particle.io/t/local-compile-electron-workflow/21694/9
+
+	How to handle cellular connection
+	https://community.particle.io/t/how-to-handle-cellular-connection-loss-on-electron/31925
 */
 
 /*

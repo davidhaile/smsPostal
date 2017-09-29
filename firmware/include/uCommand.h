@@ -5,6 +5,7 @@
 
 #define MAX_RECEIVED_MESSAGES	50
 #define SMS_BUFFER_SIZE			100
+#define SMS_PHONE_SIZE			20
 class uCommand {
   public:
 	bool setDebug(bool);
@@ -22,8 +23,8 @@ class uCommand {
 	struct smsStruct {
 		char mess;
 		char status[10];
-		char phone[20];
-		char sms[50];
+		char phone[SMS_PHONE_SIZE];
+		char sms[SMS_BUFFER_SIZE];
 	};
 	struct smsStruct* smsPtr;
 	struct smsStruct smsResults[MAX_RECEIVED_MESSAGES];
