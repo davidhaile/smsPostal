@@ -24,6 +24,7 @@ char szReturn[32] = "";
 
 //--------------------------------------------------------------------------------------------------
 os_thread_return_t smsTask() {
+	static bool toggle = false;
 	/*uint16_t counter = 0;*/
 	WAIT_UNTIL_SYSTEM_IS_READY;
 
@@ -50,10 +51,11 @@ os_thread_return_t smsTask() {
 		if (sms.requestDeleteAll) {
 			sms.requestDeleteAll = false;
 
-			/*Serial.print("Deleting all incoming messages. ");*/
 			sms.deleteAll();
-			/*Serial.println("Done");*/
 		}
+
+		LED(toggle);
+		toggle = !toggle;
 
 		delay(ONE_SECOND);
 	}
@@ -63,11 +65,16 @@ os_thread_return_t smsTask() {
 void Sms::check() {
 	if (uCmd.checkMessages(ONE_SECOND) == RESP_OK) {
 		uCmd.smsPtr = uCmd.smsResults;
-		for(int i=0;i<uCmd.numMessages;i++){
+		/*for(int i=0;i<uCmd.numMessages;i++){*/
+		for (int i=0;i<(uCmd.numMessages-1);i++) {	// Last message is always NULL
 			WITH_LOCK(Serial) {
 				displayTime();
-				Serial.printlnf("Message: [%s]",uCmd.smsPtr->sms);
+				Serial.printlnf("Message %d: From: %s [%s]", i, uCmd.smsPtr->phone, uCmd.smsPtr->sms);
 			}
+
+			// Process the incoming command
+			sCmd.readBuffer(uCmd.smsPtr->sms);
+
 			uCmd.smsPtr++;
 			smsCounter++;
 

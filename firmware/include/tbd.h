@@ -20,6 +20,9 @@
 
 	Example of receiving SMS texts using AT commands
 	https://community.particle.io/t/help-needed-to-split-incoming-sms/34275/4
+
+	Great resource for workflow - compiling in the cloud, download via USB, etc.
+	https://community.particle.io/t/local-compile-electron-workflow/21694/9
 */
 
 /*
