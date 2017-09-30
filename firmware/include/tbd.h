@@ -38,6 +38,8 @@
 
 	How to handle cellular connection
 	https://community.particle.io/t/how-to-handle-cellular-connection-loss-on-electron/31925
+
+	Implement serial port using interrupts
 */
 
 /*

@@ -33,8 +33,16 @@ void setup() {
 #else
 	Cellular.on();
 	Cellular.connect();
+	Particle.connect();
+	/*Particle.connected()*/
 #endif
 
+	/*// Wait for cell to come up
+	while (!Cellular.ready()) {
+		LED_toggle();
+		delay(100);
+	}
+*/
 	// Flush buffer
 	while (Serial.available()) {
 		Serial.read();

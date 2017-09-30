@@ -1,5 +1,15 @@
 // Environ.h
 
+// During initial setup of a device these are the usual LED specifications:
+// White pulse: Start-up (happens when the Electron is first powered on or when it's reset)
+// Flashing blue: Listening mode.
+// Flashing green: Connecting to cellular network
+// Flashing cyan: Connecting to Particle Cloud. Connected to the network, but not necessarily the internet yet.
+// High-speed flashing cyan: Particle Cloud handshake
+// Breathing cyan: Connected to Particle Cloud
+// Flashing magenta: Receiving new firmware update over-the-air (OTA)
+// Breathing magenta Safe mode, connected to Particle Cloud but user firmware not running
+//
 // #ifdef NULL
 // 	#undef NULL
 // #endif

@@ -163,7 +163,7 @@ os_thread_return_t commandTask() {
 
 	while (true) {
 		update();
-		delay(100);
+		delay(5);
 	}
 }
 
