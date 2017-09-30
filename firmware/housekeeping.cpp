@@ -62,7 +62,7 @@ void Housekeeping::update() {
 
 	}
 
-	updateLED(HOUSEKEEPING_DELAY);
+/*	updateLED(HOUSEKEEPING_DELAY);*/
 }
 
 //-------------------------------------------------------------------------------------------------

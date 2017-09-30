@@ -18,6 +18,7 @@ static void analogDisplay();
 static void smsCheck();
 static void smsDeleteAll();
 
+
 typedef struct {
 	/*char *command;*/
 	/*String command;*/
