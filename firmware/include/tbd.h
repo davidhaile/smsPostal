@@ -5,8 +5,7 @@
 /*
 	TBD:
 
-	2017-09-29 Status - Haven't seen a valid incoming text in a while. I'm not positive that the
-	problem is within the Electron. Changed
+	2017-10-04: Create an smsTest function to test transmit.
 
 	2017-09-27: Having trouble with an extra number added to the list that is a NULL length.
 
@@ -38,6 +37,9 @@
 
 	How to handle cellular connection
 	https://community.particle.io/t/how-to-handle-cellular-connection-loss-on-electron/31925
+
+	Cricket Wireless APN Information
+	https://www.cricketwireless.com/support/apps-and-services/bring-your-own-device-byod/customer/bring-your-own-android.html
 
 	Implement serial port using interrupts
 */

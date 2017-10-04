@@ -17,6 +17,7 @@ static void smsClearList();
 static void analogDisplay();
 static void smsCheck();
 static void smsDeleteAll();
+static void smsTest();
 
 
 typedef struct {
@@ -38,6 +39,7 @@ commandListType commandList[] = {
 	{"clear",	smsClearList},
 	{"check",	smsCheck},
 	{"x", 		smsDeleteAll},
+	{"test",	smsTest},
 
 	{"on", 		LED_on},
 	{"off", 	LED_off},
@@ -51,6 +53,11 @@ commandListType commandList[] = {
 };
 
 #define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)
+
+//--------------------------------------------------------------------------------------------------
+static void smsTest() {
+	sms.test();
+}
 
 //--------------------------------------------------------------------------------------------------
 static void smsCheck() {

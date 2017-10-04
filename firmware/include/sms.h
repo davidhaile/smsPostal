@@ -8,14 +8,14 @@
 #ifdef DISABLE_CELL
 	#define REPLY_VIA_SERIAL_PORT
 #else
-	// #define REPLY_VIA_SERIAL_PORT
+	#define REPLY_VIA_SERIAL_PORT
 #endif
 
 #ifdef REPLY_VIA_SERIAL_PORT
 	#define REPLY_MESSAGE(a)	Serial.println((char *)a)
 #else
-	// #define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
-	#define REPLY_MESSAGE(a)	{Serial.print((char *)"Replying...");Serial.println((char *)a);sms.sendMessage((char *)"+19706912766", (char *)a);}
+	#define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
+	// #define REPLY_MESSAGE(a)	{Serial.print((char *)"Replying...");Serial.println((char *)a);sms.sendMessage((char *)"+19706912766", (char *)a);}
 #endif
 
 #ifndef SKIP
@@ -36,6 +36,7 @@ class Sms {
 	void remove(char *);
 	void list();
 	void check();
+	void test();
 	void deleteAll();
 	bool mutex = false;		// Grab the mutex if it is false. Set to true to keep others out.
 	bool requestDeleteAll = false;

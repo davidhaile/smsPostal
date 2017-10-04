@@ -55,13 +55,20 @@ os_thread_return_t smsTask() {
 		}
 
 		// This may be too much for a long test. Fills the screen with nothing useful.
-		Serial.print('.');
+		/*Serial.print('.');*/
 
 		LED(toggle);
 		toggle = !toggle;
 
 		delay(ONE_SECOND);
 	}
+}
+
+//--------------------------------------------------------------------------------------------------
+void Sms::test() {
+	Serial.println("Sending a message to my own phone");
+	sendMessage((char *)"9706912766", (char *)"Test Message");
+	/*uCmd.sendMessage((char *)"9706912766", (char *)"Test Message", 5000);*/
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -83,6 +90,7 @@ void Sms::check() {
 				}
 
 				// Process the incoming command
+				// TBD: Change all this so that an incoming command such as "add", adds the senders phone number.
 				/*sCmd.processMessage(incomingMessage, phoneNumber);*/
 				/*sCmd.processCommand(incomingMessage);*/
 
@@ -184,20 +192,24 @@ int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
 		strncpy(phoneNumber, inputPhoneNumber, sizeof(phoneNumber));
 	}
 
-	memset(szCmd, 0, sizeof(szCmd));
-	sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
+	#ifdef USE_UCOMMAND
+		uCmd.sendMessage(inputPhoneNumber, pMessage, TIMEOUT);
+	#else
+		memset(szCmd, 0, sizeof(szCmd));
+		sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
 
-	char szReturn[32] = "";
+		char szReturn[32] = "";
 
-	GRAB_MUTEX;
-	Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
-	Cellular.command(callback, szReturn, TIMEOUT, szCmd);
-	Cellular.command(callback, szReturn, TIMEOUT, pMessage);
-	RELEASE_MUTEX;
+		GRAB_MUTEX;
+		Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
+		Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+		Cellular.command(callback, szReturn, TIMEOUT, pMessage);
+		RELEASE_MUTEX;
 
-	sprintf(szCmd, "%c", CTRL_Z);
+		sprintf(szCmd, "%c", CTRL_Z);
 
-	retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+		retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
+	#endif
 
 	return retVal;
 }
