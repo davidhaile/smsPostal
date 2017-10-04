@@ -40,10 +40,10 @@ void setup() {
 #endif
 
 	// Wait for cell to come up
-	while (!Cellular.ready()) {
+	/*while (!Cellular.ready()) {
 		LED_toggle();
 		delay(100);
-	}
+	}*/
 
 	// Flush buffer
 	while (Serial.available()) {

@@ -19,37 +19,35 @@ static void smsCheck();
 static void smsDeleteAll();
 static void smsTest();
 
-
 typedef struct {
-	/*char *command;*/
-	/*String command;*/
 	char command[SERIALCOMMAND_MAXCOMMANDLENGTH];
+	String description;
 	void (* process)();
 } commandListType;
 
 commandListType commandList[] = {
 	// SMS Commands
-	{"add", 	smsAdd},
-	{"del", 	smsRemove},
-	{"rem", 	smsRemove},
-	{"delete", 	smsRemove},
-	{"remove", 	smsRemove},
-	{"list", 	smsList},
-	{"read",	smsReadList},
-	{"clear",	smsClearList},
-	{"check",	smsCheck},
-	{"x", 		smsDeleteAll},
-	{"test",	smsTest},
+	{"add",		"Add Customer", 			smsAdd},
+	{"del",		"Delete Customer", 			smsRemove},
+	{"rem",		"Delete Customer", 			smsRemove},
+	{"delete",	"Delete Customer", 			smsRemove},
+	{"remove",	"Delete Customer", 			smsRemove},
+	{"list",	"List customers", 			smsList},
+	{"read",	"Read from EEPROM", 		smsReadList},
+	{"clear",	"Clear customer list",		smsClearList},
+	{"check",	"Check for incoming SMS",	smsCheck},
+	{"x", 		"Delete all stored SMS",	smsDeleteAll},
+	{"test",	"SMS Test",					smsTest},
 
-	{"on", 		LED_on},
-	{"off", 	LED_off},
-	{"ping",	ping},
-	{"process",	process_command},
-	{"light",	analogDisplay},
+	{"on", 		"LED on",					LED_on},
+	{"off", 	"LED off",					LED_off},
+	{"p", 		"Ping",						ping},
+	{"process",	"Process command",			process_command},
+	{"light",	"Light display",			analogDisplay},
 
-	{"time",	displayTime},
-	{"help", 	sendHelp},
-	{"h", 		sendHelp},	// Must be last in the list
+	{"time",	"Time",						displayTime},
+	{"help", 	"Help",						sendHelp},
+	{"h", 		"Help",						sendHelp},	// Must be last in the list
 };
 
 #define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)

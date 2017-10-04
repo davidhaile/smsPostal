@@ -3,7 +3,9 @@
 extern SerialCommand sCmd;
 
 // Must be less than 256
-#define SERIALPORT_BUFFER_SIZE	120
+#ifndef SERIALPORT_BUFFER_SIZE
+	#define SERIALPORT_BUFFER_SIZE	64
+#endif
 
 void updateCommandList();
 
