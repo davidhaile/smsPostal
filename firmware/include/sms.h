@@ -8,13 +8,14 @@
 #ifdef DISABLE_CELL
 	#define REPLY_VIA_SERIAL_PORT
 #else
-	#define REPLY_VIA_SERIAL_PORT
+	// #define REPLY_VIA_SERIAL_PORT
 #endif
 
 #ifdef REPLY_VIA_SERIAL_PORT
 	#define REPLY_MESSAGE(a)	Serial.println((char *)a)
 #else
-	#define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
+	// #define REPLY_MESSAGE(a)	sms.sendMessage(phoneNumber, (char *)a)
+	#define REPLY_MESSAGE(a)	{Serial.print((char *)"Replying...");Serial.println((char *)a);sms.sendMessage((char *)"+19706912766", (char *)a);}
 #endif
 
 #ifndef SKIP
@@ -147,6 +148,9 @@ class List {
 				break;
 			}
 			if (!isdigit(phoneNumber[i])) {
+				Serial.print(i); Serial.print(": ");
+				Serial.print((int)phoneNumber[i]);
+				Serial.println(" Rejected. Not a digit.");
 				return(FAIL);
 			}
 		}
