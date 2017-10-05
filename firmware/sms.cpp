@@ -24,7 +24,6 @@ char szReturn[32] = "";
 
 //--------------------------------------------------------------------------------------------------
 os_thread_return_t smsTask() {
-	static bool toggle = false;
 	/*uint16_t counter = 0;*/
 	WAIT_UNTIL_SYSTEM_IS_READY;
 
@@ -34,34 +33,40 @@ os_thread_return_t smsTask() {
 	sms.mutex = false;
 
 	while (true) {
-		/*WITH_LOCK(Serial) {
-			Serial.print("SMS Task: ");
-			Serial.print(counter);
-			Serial.print(", ");
-			Serial.print(sms.smsCounter);
-			Serial.print(", ");
-			Serial.print(sms.smsDelete);
-
-			Serial.println();
-			counter++;
-		}
-*/
-		sms.check();
-
-		if (sms.requestDeleteAll) {
-			sms.requestDeleteAll = false;
-
-			sms.deleteAll();
-		}
-
-		// This may be too much for a long test. Fills the screen with nothing useful.
-		/*Serial.print('.');*/
-
-		LED(toggle);
-		toggle = !toggle;
-
+		sms.update();
 		delay(ONE_SECOND);
 	}
+}
+
+//--------------------------------------------------------------------------------------------------
+void Sms::update() {
+	static bool toggle = false;
+
+	/*WITH_LOCK(Serial) {
+		Serial.print("SMS Task: ");
+		Serial.print(counter);
+		Serial.print(", ");
+		Serial.print(sms.smsCounter);
+		Serial.print(", ");
+		Serial.print(sms.smsDelete);
+
+		Serial.println();
+		counter++;
+	}
+*/
+	sms.check();
+
+	if (sms.requestDeleteAll) {
+		sms.requestDeleteAll = false;
+
+		sms.deleteAll();
+	}
+
+	// This may be too much for a long test. Fills the screen with nothing useful.
+	/*Serial.print('.');*/
+
+	LED(toggle);
+	toggle = !toggle;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -153,7 +158,9 @@ Sms::Sms() {
 		uCmd.setSMSMode(1);
 	#endif
 
-	smsThread = new Thread("SMS", smsTask);
+	#ifndef DISABLE_THREADS
+		smsThread = new Thread("SMS", smsTask);
+	#endif
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -171,7 +178,6 @@ static int callback(int type, const char* buf, int len, char* param) {
 // Phone number must have the area code in it. Ex: "9706912766"
 //--------------------------------------------------------------------------------------------------
 int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
-	char szCmd[80];
 	int retVal = RESP_OK;
 	char phoneNumber[MAX_PHONE_NUMBER];
 
@@ -195,6 +201,7 @@ int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
 	#ifdef USE_UCOMMAND
 		uCmd.sendMessage(inputPhoneNumber, pMessage, TIMEOUT);
 	#else
+		char szCmd[80];
 		memset(szCmd, 0, sizeof(szCmd));
 		sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
 

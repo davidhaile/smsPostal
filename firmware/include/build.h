@@ -17,4 +17,7 @@
 		#define STARTUP_WITH_CELL_OFF
 	#endif
 
+	// 2017-10-05 Trying to figure out why SMS isn't reliable
+	#define DISABLE_THREADS
+
 #endif

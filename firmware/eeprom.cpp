@@ -21,7 +21,9 @@ Eeprom::Eeprom() {
 	}
 	configurationData.system.powerCycles++;
 
-	eepromThread = new Thread("EEPROM", eepromTask);
+	#ifndef DISABLE_THREADS
+		eepromThread = new Thread("EEPROM", eepromTask);
+	#endif
 };
 
 //------------------------------------------------------------------------------------------------------

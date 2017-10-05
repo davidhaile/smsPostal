@@ -12,6 +12,7 @@ void updateCommandList();
 class Commands {
 public:
 	Commands();
+	void update();
 private:
 };
 

@@ -91,7 +91,9 @@ Housekeeping::Housekeeping() {
 	pinMode(PHOTO_POWER, OUTPUT);
 	digitalWrite(PHOTO_POWER, HIGH);
 
-	housekeepingThread = new Thread("Housekeeping", housekeepingTask);
+	#ifndef DISABLE_THREADS
+		housekeepingThread = new Thread("Housekeeping", housekeepingTask);
+	#endif
 }
 
 //-------------------------------------------------------------------------------------------------

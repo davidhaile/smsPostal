@@ -38,6 +38,7 @@ class Sms {
 	void check();
 	void test();
 	void deleteAll();
+	void update();
 	bool mutex = false;		// Grab the mutex if it is false. Set to true to keep others out.
 	bool requestDeleteAll = false;
 	uint16_t smsCounter = 0;

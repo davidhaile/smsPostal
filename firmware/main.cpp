@@ -12,7 +12,9 @@ SYSTEM_MODE(MANUAL);	// Cell starts OFF?
 SYSTEM_MODE(SEMI_AUTOMATIC);
 #endif
 
-SYSTEM_THREAD(ENABLED);
+#ifndef DISABLE_THREADS
+	SYSTEM_THREAD(ENABLED);
+#endif
 
 /*ApplicationWatchdog wd(660000, System.reset); //This Watchdog code will reset the processor if the dog is not kicked every 11 mins which gives time for 2 modem reset's.*/
 
@@ -58,5 +60,13 @@ void setup() {
 
 //--------------------------------------------------------------------------------------------------
 void loop() {
-	// This application uses tasks, therefore nothing is accomplished in the main loop().
+	#ifdef DISABLE_THREADS
+		commands.update();
+		eeprom.update();
+		housekeeping.update();
+		sms.update();
+
+	#else
+		// This application uses tasks, therefore nothing is accomplished in the main loop().
+	#endif
 }

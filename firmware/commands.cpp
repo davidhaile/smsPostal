@@ -7,7 +7,6 @@ SerialCommand sCmd;
 static void sendHelp();
 static void ping();
 static void unrecognized(const char *);
-static void update();
 static void smsAdd();
 static void smsRemove();
 static void smsList();
@@ -123,7 +122,7 @@ void smsRemove() {
 }
 
 //--------------------------------------------------------------------------------------------------
-static void update() {
+void Commands::update() {
 	switch (sCmd.state) {
 	case SC_INVALID_STATE:
 		sCmd.state = SC_WAIT_FOR_COMMAND;
@@ -167,7 +166,7 @@ os_thread_return_t commandTask() {
 	WAIT_UNTIL_SYSTEM_IS_READY;
 
 	while (true) {
-		update();
+		commands.update();
 		delay(5);
 	}
 }
@@ -185,7 +184,9 @@ Commands::Commands() {
 
 	sCmd.setDefaultHandler(unrecognized);
 
-	commandThread = new Thread("Commands", commandTask);
+	#ifndef DISABLE_THREADS
+		commandThread = new Thread("Commands", commandTask);
+	#endif
 }
 
 //------------------------------------------------------------------------------------------------------
