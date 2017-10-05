@@ -18,6 +18,7 @@
 	#endif
 
 	// 2017-10-05 Trying to figure out why SMS isn't reliable
-	#define DISABLE_THREADS
+	// No effect on reliability. It still doesn't find the tower.
+	// #define DISABLE_THREADS
 
 #endif

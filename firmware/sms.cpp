@@ -14,11 +14,12 @@
 #endif
 
 Thread *smsThread;
+
 #ifdef USE_UCOMMAND
 	uCommand uCmd;
+#else
+	static int callback(int, const char *, int, char *);
 #endif
-
-static int callback(int, const char *, int, char *);
 
 char szReturn[32] = "";
 
@@ -163,16 +164,19 @@ Sms::Sms() {
 	#endif
 }
 
-//--------------------------------------------------------------------------------------------------
-static int callback(int type, const char* buf, int len, char* param) {
-	WITH_LOCK(Serial) {
-		/*Serial.print("Return: ");*/
-		Serial.write((const uint8_t*)buf, len);
-		/*Serial.println();*/
-	}
 
-	return WAIT;
-}
+#ifndef USE_UCOMMAND
+	//--------------------------------------------------------------------------------------------------
+	static int callback(int type, const char* buf, int len, char* param) {
+		WITH_LOCK(Serial) {
+			/*Serial.print("Return: ");*/
+			Serial.write((const uint8_t*)buf, len);
+			/*Serial.println();*/
+		}
+
+		return WAIT;
+	}
+#endif
 
 //--------------------------------------------------------------------------------------------------
 // Phone number must have the area code in it. Ex: "9706912766"

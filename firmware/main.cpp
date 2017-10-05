@@ -37,7 +37,7 @@ void setup() {
 	Cellular.connect();
 
 	// 2017-10-01 I doubt if these can work without using the Particle SIM.
-	/*Particle.connect();*/
+	Particle.connect();
 	/*Particle.connected()*/
 #endif
 
@@ -65,7 +65,6 @@ void loop() {
 		eeprom.update();
 		housekeeping.update();
 		sms.update();
-
 	#else
 		// This application uses tasks, therefore nothing is accomplished in the main loop().
 	#endif

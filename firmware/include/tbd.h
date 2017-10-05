@@ -5,18 +5,12 @@
 /*
 	TBD:
 
-	2017-10-04: Create an smsTest function to test transmit.
-
-	2017-09-27: Having trouble with an extra number added to the list that is a NULL length.
+	2017-10-05: Status - It may have been OK until I tried to send a text, then it went into the
+	constantly searching for a tower mode.
 
 	2017-09-29: No reason to read a text if it has already been read. Check the status for UA_READ.
 	REC UNREAD	REC UNREAD+19706912766
 	REC READAD	REC READAD+19706912766
-
-	2017-09-29: SerialCommand should be modified to allow multiple terminators and ignore all in
-	message. '\r'. '\n', '\0'
-
-	Why does it stop accepting Serial input? TBD: Add bufferIncomingValue() from other projects.
 
 	Resources:
 
@@ -46,5 +40,8 @@
 
 /*
 	DONE
+
+	2017-10-05: Added ability to not use threading. It doesn't seem to have any affect on SMS reliability.
+	It must be something else. The RGB LED says it isn't finding the tower.
 
 */
