@@ -36,9 +36,14 @@ void setup() {
 	Cellular.on();
 	Cellular.connect();
 
-	// 2017-10-01 I doubt if these can work without using the Particle SIM.
-	/*Particle.connect();*/
+	// This works. Is it necessary? Can I use it to maintain the link?
+	Particle.connect();
 	/*Particle.connected()*/
+
+	/*// Turn off the RGB LED
+	RGB.control(true);
+	RGB.color(0, 0, 0);
+	RGB.brightness(0);*/
 #endif
 
 	// Wait for cell to come up

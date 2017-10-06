@@ -77,7 +77,8 @@ void Sms::check() {
 	if (uCmd.checkMessages(TEN_SECONDS) == RESP_OK) {
 		uCmd.smsPtr = uCmd.smsResults;
 		for(int i=0;i<uCmd.numMessages;i++){
-			if ((strlen(uCmd.smsPtr->status) > 0) && strstr(uCmd.smsPtr->status, "UNREAD")) {
+			/*if ((strlen(uCmd.smsPtr->status) > 0) && strstr(uCmd.smsPtr->status, "UNREAD")) {*/
+			if (strlen(uCmd.smsPtr->status) > 0) {
 				strncpy(incomingMessage, uCmd.smsPtr->sms, sizeof(incomingMessage));
 				strncpy(phoneNumber, uCmd.smsPtr->phone, sizeof(phoneNumber));
 
