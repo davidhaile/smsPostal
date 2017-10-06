@@ -50,13 +50,11 @@ void Sms::update() {
 	if (sms.requestDeleteAll) {
 		sms.requestDeleteAll = false;
 
-		/*Serial.print("Deleting all stored messages");*/
-
 		sms.deleteAll();
+		Serial.print('x');
+	} else {
+		/*Serial.print('.');*/
 	}
-
-	// This may be too much for a long test. Fills the screen with nothing useful.
-	Serial.print('.');
 
 	LED(toggle);
 	toggle = !toggle;
@@ -90,6 +88,7 @@ void Sms::check() {
 
 				// Process the incoming command
 				// TBD: Change all this so that an incoming command such as "add", adds the senders phone number.
+				/*sCmd.processMessage(incomingMessage, phoneNumber);*/
 				sCmd.processCommand(incomingMessage);
 
 				uCmd.smsPtr++;

@@ -55,11 +55,12 @@ int callback(int type, const char* buf, int len, char* result) {
 	case TYPE_PROMPT :
 		break;
 	case TYPE_PLUS :
-		if (_callback_debug) {
-			Serial.printlnf("Response in callback %x: %i : %s: \r\n", type, len, buf);
-		}
-		
 		if ((cp = strstr(buf, "CMGL:")) != NULL) {
+			if (_callback_debug) {
+				/*Serial.printlnf("Response in callback %x: %i : %s: \r\n", type, len, buf);*/
+				Serial.printlnf("Response in callback %x: %i : %s:", type, len, buf);
+			}
+
 			while (!isdigit(*cp)) { cp++; }
 			_messPtr->mess = atoi(cp);
 			while (*cp != '"') { cp++; }

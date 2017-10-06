@@ -2,30 +2,20 @@
 // TBD.h
 //-------------------------------------------------------------------------------------------------
 /*
-	2017-10-06 Journal
-
-	1:20a	Restored firmware.bin. Downloaded cellData. Working.
-
-	Download smsPostal. Came up breathing cyan, flashing blue led. Looks good, but will it send a
-	text? No, doesn't look like it is going to work.
-
-
-
 */
 
 
 /*
 	TBD:
 
-	2017-10-05: Status - It may have been OK until I tried to send a text, then it went into the
-	constantly searching for a tower mode.
-
-	2017-10-05: It is very possible that the Cricket SIM will never work with a Particle. I rebuilt
-	the cellData app and downloaded to it and it isn't updating either.
-
-	2017-09-29: No reason to read a text if it has already been read. Check the status for UA_READ.
-	REC UNREAD	REC UNREAD+19706912766
-	REC READAD	REC READAD+19706912766
+	2017-10-06 3am Status:
+	- It doesn't delete messages that it just read.
+	- Sometimes the incoming message is returned as a null string. This may be specific to the
+	  message, such as "Time".
+	- If message has a length, it is correctly processed.
+	- TBD: Add feature to add incoming message phone number to list.
+	- SMS Transmit doesn't work and may screw up the device. It started breathing green, but otherwise
+	  continued to work. Next debug step is transmit.
 
 	Resources:
 
