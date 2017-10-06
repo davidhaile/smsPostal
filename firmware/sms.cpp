@@ -64,9 +64,10 @@ void Sms::update() {
 
 //--------------------------------------------------------------------------------------------------
 void Sms::test() {
-	Serial.println("Sending a message to my own phone");
+	Serial.println("This hoses up the whole system. Don't do it.debug");
+	/*Serial.println("Sending a message to my own phone");*/
 	/*sendMessage((char *)"9706912766", (char *)"Test Message");*/
-	uCmd.sendMessage((char *)"+19706912766", (char *)"Test Message", 5000);
+	/*uCmd.sendMessage((char *)"+19706912766", (char *)"Test Message", 5000);*/
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -89,8 +90,7 @@ void Sms::check() {
 
 				// Process the incoming command
 				// TBD: Change all this so that an incoming command such as "add", adds the senders phone number.
-				/*sCmd.processMessage(incomingMessage, phoneNumber);*/
-				/*sCmd.processCommand(incomingMessage);*/
+				sCmd.processCommand(incomingMessage);
 
 				uCmd.smsPtr++;
 				smsCounter++;
