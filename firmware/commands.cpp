@@ -17,6 +17,7 @@ static void analogDisplay();
 static void smsCheck();
 static void smsDeleteAll();
 static void smsTest();
+static void smsDebug();
 
 typedef struct {
 	char command[SERIALCOMMAND_MAXCOMMANDLENGTH];
@@ -37,6 +38,7 @@ commandListType commandList[] = {
 	{"check",	"Check for incoming SMS",	smsCheck},
 	{"x", 		"Delete all stored SMS",	smsDeleteAll},
 	{"test",	"SMS Test",					smsTest},
+	{"debug",	"Toggle debug mode",		smsDebug},
 
 	{"on", 		"LED on",					LED_on},
 	{"off", 	"LED off",					LED_off},
@@ -50,6 +52,20 @@ commandListType commandList[] = {
 };
 
 #define NUMBER_OF_COMMANDS  sizeof(commandList)/sizeof(commandListType)
+
+//--------------------------------------------------------------------------------------------------
+static void smsDebug() {
+	static bool toggle = false;
+	if (toggle) {
+		Serial.println("Debug mode is OFF");
+		uCmd.setDebug(false);
+		toggle = false;
+	} else {
+		Serial.println("Debug mode is ON");
+		uCmd.setDebug(true);
+		toggle = true;
+	}
+}
 
 //--------------------------------------------------------------------------------------------------
 static void smsTest() {

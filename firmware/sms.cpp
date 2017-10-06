@@ -9,17 +9,7 @@
 */
 #include "include/environ.h"
 
-#ifndef DISABLE_CELL
-	#define USE_UCOMMAND
-#endif
-
 Thread *smsThread;
-
-#ifdef USE_UCOMMAND
-	uCommand uCmd;
-#else
-	static int callback(int, const char *, int, char *);
-#endif
 
 char szReturn[32] = "";
 
@@ -60,6 +50,8 @@ void Sms::update() {
 	if (sms.requestDeleteAll) {
 		sms.requestDeleteAll = false;
 
+		/*Serial.print("Deleting all stored messages");*/
+
 		sms.deleteAll();
 	}
 
@@ -73,13 +65,12 @@ void Sms::update() {
 //--------------------------------------------------------------------------------------------------
 void Sms::test() {
 	Serial.println("Sending a message to my own phone");
-	sendMessage((char *)"9706912766", (char *)"Test Message");
-	/*uCmd.sendMessage((char *)"9706912766", (char *)"Test Message", 5000);*/
+	/*sendMessage((char *)"9706912766", (char *)"Test Message");*/
+	uCmd.sendMessage((char *)"+19706912766", (char *)"Test Message", 5000);
 }
 
 //--------------------------------------------------------------------------------------------------
 void Sms::check() {
-#ifdef USE_UCOMMAND
 	char incomingMessage[SMS_BUFFER_SIZE];
 	char phoneNumber[SMS_PHONE_SIZE];
 
@@ -110,12 +101,10 @@ void Sms::check() {
 			}
 		}
 	}
-#endif
 }
 
 //--------------------------------------------------------------------------------------------------
 void Sms::deleteAll() {
-#ifdef USE_UCOMMAND
 	// delete all the messages
 	uCmd.smsPtr = uCmd.smsResults;
 	for(int i=0;i<uCmd.numMessages;i++){
@@ -130,7 +119,6 @@ void Sms::deleteAll() {
 		uCmd.smsPtr++;
 		smsDelete++;
 	}
-#endif
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -152,32 +140,16 @@ void Sms::list() {
 // Constructor
 //--------------------------------------------------------------------------------------------------
 Sms::Sms() {
-	#ifdef USE_UCOMMAND
-		uCmd.setDebug(true);
-		/*uCmd.setDebug(false);*/
+	/*uCmd.setDebug(true);*/
+	uCmd.setDebug(false);
 
-		// set up text mode for the sms
-		uCmd.setSMSMode(1);
-	#endif
+	// set up text mode for the sms
+	uCmd.setSMSMode(1);
 
 	#ifndef DISABLE_THREADS
 		smsThread = new Thread("SMS", smsTask);
 	#endif
 }
-
-
-#ifndef USE_UCOMMAND
-	//--------------------------------------------------------------------------------------------------
-	static int callback(int type, const char* buf, int len, char* param) {
-		WITH_LOCK(Serial) {
-			/*Serial.print("Return: ");*/
-			Serial.write((const uint8_t*)buf, len);
-			/*Serial.println();*/
-		}
-
-		return WAIT;
-	}
-#endif
 
 //--------------------------------------------------------------------------------------------------
 // Phone number must have the area code in it. Ex: "9706912766"
@@ -203,25 +175,7 @@ int Sms::sendMessage(char *inputPhoneNumber, char* pMessage) {
 		strncpy(phoneNumber, inputPhoneNumber, sizeof(phoneNumber));
 	}
 
-	#ifdef USE_UCOMMAND
-		uCmd.sendMessage(inputPhoneNumber, pMessage, TIMEOUT);
-	#else
-		char szCmd[80];
-		memset(szCmd, 0, sizeof(szCmd));
-		sprintf(szCmd, "AT+CMGS=\"+%s\",145\r\n", phoneNumber);
-
-		char szReturn[32] = "";
-
-		GRAB_MUTEX;
-		Cellular.command(callback, szReturn, TIMEOUT, "AT+CMGF=1\r\n");
-		Cellular.command(callback, szReturn, TIMEOUT, szCmd);
-		Cellular.command(callback, szReturn, TIMEOUT, pMessage);
-		RELEASE_MUTEX;
-
-		sprintf(szCmd, "%c", CTRL_Z);
-
-		retVal = Cellular.command(callback, szReturn, TIMEOUT, szCmd);
-	#endif
+	uCmd.sendMessage(inputPhoneNumber, pMessage, TIMEOUT);
 
 	return retVal;
 }

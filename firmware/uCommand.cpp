@@ -9,9 +9,9 @@ struct _messStruct {
 	char sms[50];
 };
 static struct _messStruct* _messPtr;
-static struct _messStruct _messResults[10];
+static struct _messStruct _messResults[MAX_RECEIVED_MESSAGES];
 static char _messN;
-static char _u_debug = false;
+static char _callback_debug = false;
 
 /*
 	The callback function for the Cellular.command() - unfortunately Particle don't seem
@@ -29,10 +29,9 @@ int callback(int type, const char* buf, int len, char* result) {
 	for (i = 0; i < _messN; i++) { _messPtr++; }	// need to point at the right location
 	tp = (char*)buf + len;
 	*tp = 0;	// the buffer is not null terminated so we don't want leftover crap
-	/*if (_u_debug) {*/
-	if (false) {
+	/*if (_callback_debug) {
 		Serial.printlnf("Response in callback %x: %i : %s: \r\n", type, len, buf);
-	}
+	}*/
 	switch (type) {
 	case TYPE_UNKNOWN :
 		// this could be the next part of a +CMGL response with the sms text in buf
@@ -56,6 +55,10 @@ int callback(int type, const char* buf, int len, char* result) {
 	case TYPE_PROMPT :
 		break;
 	case TYPE_PLUS :
+		if (_callback_debug) {
+			Serial.printlnf("Response in callback %x: %i : %s: \r\n", type, len, buf);
+		}
+		
 		if ((cp = strstr(buf, "CMGL:")) != NULL) {
 			while (!isdigit(*cp)) { cp++; }
 			_messPtr->mess = atoi(cp);
@@ -71,8 +74,8 @@ int callback(int type, const char* buf, int len, char* result) {
 			while (*ep != '"') { ep++; }
 			strncpy(_messPtr->phone, cp, (char)(ep - cp));	// phone number
 		}
-		if (strstr(buf, "CMGR:")) {
-		}
+		/*if (strstr(buf, "CMGR:")) {
+		}*/
 		break;
 	case TYPE_TEXT :
 		break;
@@ -92,7 +95,7 @@ int callback(int type, const char* buf, int len, char* result) {
 //--------------------------------------------------------------------------------------------------
 bool uCommand::setDebug(bool _debug) {
 	debugMode = _debug;
-	_u_debug = _debug;
+	_callback_debug = _debug;
 	return debugMode;
 }
 
@@ -129,24 +132,29 @@ int uCommand::sendMessage(char* pMessage, char* phoneNumber, int timeout) {
 }
 
 //--------------------------------------------------------------------------------------------------
+// DWH: What is retVal? Where does _messResults come from? Global in callback()?
+//--------------------------------------------------------------------------------------------------
 int uCommand::checkMessages(int timeout) {
 	int retVal;
 	char i;
 	// check for any sms messages on device, results are returned in smsResults
 	_messN = 0;	// need some local counters here to retrieve all the information
 	sprintf(sendBuffer, "AT+CMGL\r\n");
-	if (debugMode) { Serial.printlnf("Request sent to modem is: %s", sendBuffer); }
+	/*if (debugMode) { Serial.printlnf("Request sent to modem is: %s", sendBuffer); }*/
 	retVal = Cellular.command(callback, rxBuffer, timeout, sendBuffer);
 	_messPtr = _messResults;
+	numMessages = _messN;
 	if (debugMode) {
-		Serial.println("Results of the list message command are");
-		for (i = 0; (i < _messN) && (i < MAX_RECEIVED_MESSAGES); i++) {
-			Serial.printlnf("message number %d", _messPtr->mess);
-			Serial.printlnf("message status %s", _messPtr->status);
-			Serial.printlnf("message phone %s", _messPtr->phone);
-			Serial.printlnf("message sms %s", _messPtr->sms);
-			Serial.println("-------------------------------------");
-			_messPtr++;
+		if (numMessages > 0) {
+			Serial.println("Results of the list message command are");
+			for (i = 0; (i < numMessages) && (i < MAX_RECEIVED_MESSAGES); i++) {
+				Serial.printlnf("message number %d", _messPtr->mess);
+				Serial.printlnf("message status %s", _messPtr->status);
+				Serial.printlnf("message phone %s", _messPtr->phone);
+				Serial.printlnf("message sms %s", _messPtr->sms);
+				Serial.println("-------------------------------------");
+				_messPtr++;
+			}
 		}
 	}
 	// now put the results into a public structure

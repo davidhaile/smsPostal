@@ -31,3 +31,9 @@ class uCommand {
 	char numMessages;
   private:
 };
+
+#ifdef GLOBAL
+	uCommand uCmd;
+#endif
+
+extern uCommand uCmd;
