@@ -62,7 +62,7 @@ void setup() {
 void loop() {
 	#ifdef DISABLE_THREADS
 		commands.update();
-		eeprom.update();
+		/*eeprom.update();*/
 		housekeeping.update();
 		sms.update();
 	#else

@@ -64,7 +64,7 @@ void Sms::update() {
 	}
 
 	// This may be too much for a long test. Fills the screen with nothing useful.
-	/*Serial.print('.');*/
+	Serial.print('.');
 
 	LED(toggle);
 	toggle = !toggle;
@@ -83,7 +83,8 @@ void Sms::check() {
 	char incomingMessage[SMS_BUFFER_SIZE];
 	char phoneNumber[SMS_PHONE_SIZE];
 
-	if (uCmd.checkMessages(ONE_SECOND) == RESP_OK) {
+	/*if (uCmd.checkMessages(ONE_SECOND) == RESP_OK) {*/
+	if (uCmd.checkMessages(TEN_SECONDS) == RESP_OK) {
 		uCmd.smsPtr = uCmd.smsResults;
 		for(int i=0;i<uCmd.numMessages;i++){
 			if ((strlen(uCmd.smsPtr->status) > 0) && strstr(uCmd.smsPtr->status, "UNREAD")) {
@@ -152,8 +153,8 @@ void Sms::list() {
 //--------------------------------------------------------------------------------------------------
 Sms::Sms() {
 	#ifdef USE_UCOMMAND
-		/*uCmd.setDebug(true);*/
-		uCmd.setDebug(false);
+		uCmd.setDebug(true);
+		/*uCmd.setDebug(false);*/
 
 		// set up text mode for the sms
 		uCmd.setSMSMode(1);
