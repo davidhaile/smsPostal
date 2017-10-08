@@ -1,13 +1,13 @@
 #include "application.h"
 #include "include/uCommand.h"
 
-
 struct _messStruct {
 	char mess;
 	char status[10];
 	char phone[20];
 	char sms[50];
 };
+
 static struct _messStruct* _messPtr;
 static struct _messStruct _messResults[MAX_RECEIVED_MESSAGES];
 static char _messN;
